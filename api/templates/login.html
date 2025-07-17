@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NumAI - Login</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/auth.css') }}">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="auth-container">
+        <div class="auth-card">
+            <div class="auth-header">
+                <h1 class="title">NumAI</h1>
+                <p class="auth-subtitle">Sign in to continue</p>
+            </div>
+            
+            <div class="auth-form">
+                <div class="input-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" placeholder="Enter your email">
+                </div>
+                
+                <div class="input-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" placeholder="Enter your password">
+                    <button class="toggle-password" type="button">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                </div>
+                
+                <div class="auth-options">
+                    <div class="remember-me">
+                        <input type="checkbox" id="remember">
+                        <label for="remember">Remember me</label>
+                    </div>
+                    <a href="/reset-password" class="forgot-password">Forgot password?</a>
+                </div>
+                
+                <button id="login-btn" class="auth-btn">Sign In</button>
+                
+                <div class="auth-divider">
+                    <span>OR</span>
+                </div>
+                
+                <button id="google-btn" class="social-auth-btn">
+                    <img src="{{ url_for('static', filename='img/google-icon.svg') }}" alt="Google">
+                    Sign in with Google
+                </button>
+                
+                <p class="auth-redirect">
+                    Don't have an account? <a href="/register">Sign up</a>
+                </p>
+            </div>
+            
+            <div id="auth-message" class="auth-message"></div>
+        </div>
+        
+        <div class="auth-blob"></div>
+    </div>
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <script src="{{ url_for('static', filename='js/auth.js') }}"></script>
+</body>
+</html>

@@ -1,0 +1,9 @@
+<svg width="100" height="100" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Cohere logo for Milky S2 -->
+  <circle cx="50" cy="50" r="45" fill="#5D5DFF" opacity="0.9"/>
+  <path d="M30 40C30 34.4772 34.4772 30 40 30H60C65.5228 30 70 34.4772 70 40V60C70 65.5228 65.5228 70 60 70H40C34.4772 70 30 65.5228 30 60V40Z" fill="white" opacity="0.85"/>
+  <path d="M42 50H58" stroke="#5D5DFF" stroke-width="4" stroke-linecap="round"/>
+  <path d="M42 58H58" stroke="#5D5DFF" stroke-width="4" stroke-linecap="round"/>
+  <path d="M42 42H58" stroke="#5D5DFF" stroke-width="4" stroke-linecap="round"/>
+  <text x="50" y="85" text-anchor="middle" font-family="Arial" font-weight="bold" font-size="12" fill="white">S2</text>
+</svg>

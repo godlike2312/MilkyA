@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <!-- Background Circle with Gradient -->
+  <defs>
+    <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#4facfe" />
+      <stop offset="100%" stop-color="#00f2fe" />
+    </linearGradient>
+    <linearGradient id="textGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" />
+      <stop offset="100%" stop-color="#f0f0f0" />
+    </linearGradient>
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="4" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+  
+  <!-- Main Circle -->
+  <circle cx="100" cy="100" r="90" fill="url(#bgGradient)" />
+  
+  <!-- Inner Circle -->
+  <circle cx="100" cy="100" r="75" fill="#121212" opacity="0.85" />
+  
+  <!-- Digital Circuit Lines -->
+  <path d="M40,100 L70,100 M130,100 L160,100 M100,40 L100,70 M100,130 L100,160" 
+        stroke="url(#bgGradient)" stroke-width="4" stroke-linecap="round" />
+  <path d="M60,60 L80,80 M120,80 L140,60 M60,140 L80,120 M120,120 L140,140" 
+        stroke="url(#bgGradient)" stroke-width="4" stroke-linecap="round" />
+  
+  <!-- N Letter -->
+  <path d="M70,75 L70,125 L90,75 L90,125" 
+        stroke="url(#textGradient)" stroke-width="8" fill="none" stroke-linecap="round" stroke-linejoin="round" filter="url(#glow)" />
+  
+  <!-- I Letter -->
+  <path d="M110,75 L110,125" 
+        stroke="url(#textGradient)" stroke-width="8" fill="none" stroke-linecap="round" filter="url(#glow)" />
+  
+  <!-- Dot for the I -->
+  <circle cx="110" cy="65" r="4" fill="url(#textGradient)" filter="url(#glow)" />
+  
+  <!-- Pulse Animation -->
+  <circle cx="100" cy="100" r="85" fill="none" stroke="url(#bgGradient)" stroke-width="2" opacity="0.5">
+    <animate attributeName="r" values="85;90;85" dur="2s" repeatCount="indefinite" />
+    <animate attributeName="opacity" values="0.5;0.2;0.5" dur="2s" repeatCount="indefinite" />
+  </circle>
+</svg>

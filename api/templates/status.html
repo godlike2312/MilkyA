@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NumAI - System Status</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #4a6cf7;
+            --secondary-color: #848db3;
+            --background-color: #f5f8ff;
+            --card-bg: #ffffff;
+            --text-color: #333;
+            --border-color: #e0e0e0;
+            --success-color: #4caf50;
+            --warning-color: #ff9800;
+            --error-color: #f44336;
+        }
+        
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        h1 {
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+        
+        .status-card {
+            background-color: var(--card-bg);
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .status-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 10px;
+        }
+        
+        .status-title {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+        
+        .status-indicator {
+            display: flex;
+            align-items: center;
+        }
+        
+        .status-indicator i {
+            margin-right: 5px;
+        }
+        
+        .status-ok {
+            color: var(--success-color);
+        }
+        
+        .status-warning {
+            color: var(--warning-color);
+        }
+        
+        .status-error {
+            color: var(--error-color);
+        }
+        
+        .status-content {
+            margin-top: 15px;
+        }
+        
+        .status-item {
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .status-item:last-child {
+            border-bottom: none;
+        }
+        
+        .status-label {
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        
+        .model-card {
+            background-color: var(--card-bg);
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-left: 4px solid var(--primary-color);
+        }
+        
+        .model-name {
+            font-weight: bold;
+            color: var(--primary-color);
+            margin-bottom: 5px;
+        }
+        
+        .model-details {
+            font-size: 0.9rem;
+            color: var(--secondary-color);
+        }
+        
+        .refresh-btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            display: block;
+            margin: 20px auto;
+            transition: background-color 0.3s;
+        }
+        
+        .refresh-btn:hover {
+            background-color: #3a5bd9;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 20px;
+            font-style: italic;
+            color: var(--secondary-color);
+        }
+        
+        .error-message {
+            background-color: #ffebee;
+            color: var(--error-color);
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            border-left: 4px solid var(--error-color);
+        }
+        
+        .back-link {
+            display: inline-block;
+            margin-top: 20px;
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+        
+        .back-link:hover {
+            text-decoration: underline;
+        }
+        
+        pre {
+            background-color: #f5f5f5;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+            font-size: 0.9rem;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+            
+            .status-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .status-indicator {
+                margin-top: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>NumAI System Status</h1>
+            <p>Check the current status of the AI services and API connections</p>
+        </header>
+        
+        <div id="status-container">
+            <div class="loading">
+                <i class="fas fa-spinner fa-spin"></i> Loading system status...
+            </div>
+        </div>
+        
+        <button id="refresh-btn" class="refresh-btn">
+            <i class="fas fa-sync-alt"></i> Refresh Status
+        </button>
+        
+        <a href="/" class="back-link"><i class="fas fa-arrow-left"></i> Back to Home</a>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Fetch status on page load
+            fetchStatus();
+            
+            // Add event listener for refresh button
+            document.getElementById('refresh-btn').addEventListener('click', fetchStatus);
+            
+            function fetchStatus() {
+                const statusContainer = document.getElementById('status-container');
+                statusContainer.innerHTML = '<div class="loading"><i class="fas fa-spinner fa-spin"></i> Loading system status...</div>';
+                
+                fetch('/api/status')
+                    .then(response => response.json())
+                    .then(data => {
+                        displayStatus(data);
+                    })
+                    .catch(error => {
+                        statusContainer.innerHTML = `
+                            <div class="error-message">
+                                <i class="fas fa-exclamation-triangle"></i> Error fetching status: ${error.message}
+                            </div>
+                        `;
+                    });
+            }
+            
+            function displayStatus(data) {
+                const statusContainer = document.getElementById('status-container');
+                let html = '';
+                
+                if (data.status === 'error') {
+                    html += `
+                        <div class="error-message">
+                            <i class="fas fa-exclamation-triangle"></i> ${data.message}
+                        </div>
+                    `;
+                } else {
+                    // API Key Status Card
+                    const keyStatus = data.api_key_status;
+                    html += `
+                        <div class="status-card">
+                            <div class="status-header">
+                                <div class="status-title">API Key Status</div>
+                                <div class="status-indicator status-${keyStatus.valid ? 'ok' : 'error'}">
+                                    <i class="fas fa-${keyStatus.valid ? 'check-circle' : 'exclamation-circle'}"></i>
+                                    ${keyStatus.valid ? 'Active' : 'Invalid'}
+                                </div>
+                            </div>
+                            <div class="status-content">
+                                <div class="status-item">
+                                    <span class="status-label">Key Type:</span>
+                                    <span>${keyStatus.key_type || 'Unknown'}</span>
+                                </div>
+                                <div class="status-item">
+                                    <span class="status-label">Credits:</span>
+                                    <span>${keyStatus.credits ? '$' + keyStatus.credits.toFixed(2) : 'N/A'}</span>
+                                </div>
+                    `;
+                    
+                    // Rate Limits
+                    if (keyStatus.rate_limits && keyStatus.rate_limits.length > 0) {
+                        html += `<div class="status-item">
+                                    <span class="status-label">Rate Limits:</span>
+                                    <div style="margin-top: 10px;">
+                        `;
+                        
+                        keyStatus.rate_limits.forEach(limit => {
+                            const percentUsed = limit.remaining > 0 ? 
+                                Math.round((1 - (limit.remaining / limit.limit)) * 100) : 100;
+                            
+                            let statusClass = 'status-ok';
+                            if (percentUsed > 80) statusClass = 'status-error';
+                            else if (percentUsed > 50) statusClass = 'status-warning';
+                            
+                            html += `
+                                <div style="margin-bottom: 8px;">
+                                    <div>${limit.limit_type}: ${limit.remaining}/${limit.limit} remaining</div>
+                                    <div style="background-color: #e0e0e0; height: 8px; border-radius: 4px; margin-top: 5px;">
+                                        <div style="background-color: ${statusClass === 'status-ok' ? '#4caf50' : statusClass === 'status-warning' ? '#ff9800' : '#f44336'}; 
+                                                    height: 8px; border-radius: 4px; width: ${percentUsed}%;"></div>
+                                    </div>
+                                </div>
+                            `;
+                        });
+                        
+                        html += `</div></div>`;
+                    }
+                    
+                    html += `</div></div>`;
+                    
+                    // Models Status Card
+                    html += `
+                        <div class="status-card">
+                            <div class="status-header">
+                                <div class="status-title">AI Models Status</div>
+                                <div class="status-indicator ${data.available_models.length > 0 ? 'status-ok' : 'status-error'}">
+                                    <i class="fas ${data.available_models.length > 0 ? 'fa-check-circle' : 'fa-exclamation-circle'}"></i>
+                                    ${data.available_models.length > 0 ? data.available_models.length + ' Available' : 'No Models Available'}
+                                </div>
+                            </div>
+                            <div class="status-content">
+                    `;
+                    
+                    if (data.available_models.length > 0) {
+                        data.available_models.forEach(model => {
+                            html += `
+                                <div class="model-card">
+                                    <div class="model-name">${model.name || model.id}</div>
+                                    <div class="model-details">
+                                        <div>ID: ${model.id}</div>
+                                        <div>Context Length: ${model.context_length.toLocaleString()} tokens</div>
+                                    </div>
+                                </div>
+                            `;
+                        });
+                    } else {
+                        html += `
+                            <div class="status-item">
+                                <div class="error-message">
+                                    No models are currently available. This may be due to rate limits or API issues.
+                                </div>
+                            </div>
+                        `;
+                    }
+                    
+                    // Configured models that aren't available
+                    const unavailableModels = data.configured_models.filter(model => 
+                        !data.available_models.some(available => available.id === model)
+                    );
+                    
+                    if (unavailableModels.length > 0) {
+                        html += `
+                            <div class="status-item">
+                                <span class="status-label">Unavailable Configured Models:</span>
+                                <div style="margin-top: 10px;">
+                        `;
+                        
+                        unavailableModels.forEach(model => {
+                            html += `
+                                <div class="model-card" style="border-left-color: #f44336;">
+                                    <div class="model-name">${model}</div>
+                                    <div class="model-details">
+                                        <div class="status-error"><i class="fas fa-exclamation-circle"></i> Currently unavailable</div>
+                                    </div>
+                                </div>
+                            `;
+                        });
+                        
+                        html += `</div></div>`;
+                    }
+                    
+                    html += `</div></div>`;
+                    
+                    // Server Info Card
+                    html += `
+                        <div class="status-card">
+                            <div class="status-header">
+                                <div class="status-title">Server Information</div>
+                                <div class="status-indicator status-ok">
+                                    <i class="fas fa-check-circle"></i> Online
+                                </div>
+                            </div>
+                            <div class="status-content">
+                                <div class="status-item">
+                                    <span class="status-label">Server Time:</span>
+                                    <span>${data.server_time}</span>
+                                </div>
+                                <div class="status-item">
+                                    <span class="status-label">Last Updated:</span>
+                                    <span>${new Date().toLocaleString()}</span>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+                
+                statusContainer.innerHTML = html;
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48">
+  <!-- Background Circle with Gradient -->
+  <defs>
+    <linearGradient id="milky-small-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FF6B6B" />
+      <stop offset="100%" stop-color="#FFE66D" />
+    </linearGradient>
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="2" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+  
+  <!-- Main Circle -->
+  <circle cx="24" cy="24" r="22" fill="url(#milky-small-gradient)" opacity="0.2" />
+  
+  <!-- Stylized M -->
+  <g filter="url(#glow)">
+    <path d="M14,14 L14,34 L18,34 L18,20 L22,28 L26,20 L26,34 L30,34 L30,14 L25,14 L22,22 L19,14 Z" fill="url(#milky-small-gradient)" />
+    
+    <!-- Stylized S -->
+    <path d="M32,18 C32,16 33,14 36,14 C39,14 40,16 40,18 C40,20 39,21 36,22 C33,23 32,24 32,26 C32,28 33,30 36,30 C39,30 40,28 40,26 M32,18 C32,16 33,14 36,14" stroke="url(#milky-small-gradient)" stroke-width="2" fill="none" />
+  </g>
+</svg>

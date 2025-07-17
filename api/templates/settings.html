@@ -1,0 +1,137 @@
+<!-- Settings Container HTML -->
+<div id="settings-container" class="settings-container">
+    <div class="settings-header">
+        <h2>Settings</h2>
+        <button id="close-settings" class="close-settings">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+    
+    <div class="settings-tabs">
+        <div class="tab active" data-tab="general">General</div>
+        <div class="tab" data-tab="profile">Profile</div>
+        <div class="tab" data-tab="advanced">Advanced</div>
+        <div class="tab" data-tab="about">About</div>
+    </div>
+    
+    <div class="settings-content">
+        <!-- General Settings Tab -->
+        <div class="tab-content active" id="general-tab">
+            <div class="settings-section">
+                <h3>Theme</h3>
+                <div class="theme-selector">
+                    <div class="theme-option" data-theme="dark">
+                        <div class="theme-preview dark"></div>
+                        <span>Dark</span>
+                    </div>
+                    <div class="theme-option" data-theme="light">
+                        <div class="theme-preview light"></div>
+                        <span>Light</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="settings-section">
+                <h3>Language</h3>
+                <select id="language-selector" class="language-selector">
+                    <option value="en">English</option>
+                    <option value="es">Español</option>
+                    <option value="fr">Français</option>
+                    <option value="de">Deutsch</option>
+                    <option value="zh">中文</option>
+                </select>
+            </div>
+            
+            <div class="settings-section">
+                <h3>AI Model</h3>
+                <div class="model-selector-container">
+                    <select id="model-selector" class="model-selector">
+                        <!-- Models will be populated from JavaScript -->
+                    </select>
+                    <div class="model-description" id="model-description">
+                        Select a model to see its description
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Profile Settings Tab -->
+        <div class="tab-content" id="profile-tab">
+            <div class="settings-section">
+                <h3>Account Information</h3>
+                <div class="profile-info">
+                    <div class="profile-field">
+                        <label>Name</label>
+                        <div id="profile-name" class="profile-value">Loading...</div>
+                    </div>
+                    <div class="profile-field">
+                        <label>Email</label>
+                        <div id="profile-email" class="profile-value">Loading...</div>
+                    </div>
+                    <div class="profile-field">
+                        <label>Account Type</label>
+                        <div id="profile-type" class="profile-value">Standard</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="settings-section">
+                <h3>Data Management</h3>
+                <button id="export-chats" class="settings-button">
+                    <i class="fas fa-download"></i> Export Chats
+                </button>
+                <button id="delete-all-chats" class="settings-button danger">
+                    <i class="fas fa-trash"></i> Delete All Chats
+                </button>
+                <button id="delete-account" class="settings-button danger">
+                    <i class="fas fa-user-slash"></i> Delete Account
+                </button>
+            </div>
+        </div>
+        
+        <!-- Advanced Tab -->
+        <div class="tab-content" id="advanced-tab">
+            <div class="settings-section">
+                <h3>Voice Selection</h3>
+                <div class="voice-selector">
+                    <select id="voice-select" class="voice-select">
+                        <optgroup label="Male Voices">
+                            <option value="male-1">William (AU)</option>
+                            <option value="male-2">Ryan (GB)</option>
+                            <option value="male-3">Mitchell (NZ)</option>
+                            <option value="male-4">Guy (US)</option>
+                            <option value="male-5">Liam (CA)</option>
+                            <option value="male-6">Prabhat (IN)</option>
+                        </optgroup>
+                        <optgroup label="Female Voices">
+                            <option value="female-1">Natasha (AU)</option>
+                            <option value="female-2">Sonia (GB)</option>
+                            <option value="female-3">Ava (US)</option>
+                            <option value="female-4">Jenny (US)</option>
+                            <option value="female-5">Clara (CA)</option>
+                            <option value="female-6">Neerja (IN)</option>
+                        </optgroup>
+                    </select>
+                    <button id="preview-voice-btn" class="settings-button">
+                        <i class="fas fa-play"></i> Preview Voice
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- About Tab -->
+        <div class="tab-content" id="about-tab">
+            <div class="settings-section">
+                <h3>About NumAI</h3>
+                <p>NumAI, providing intelligent conversational AI capabilities.</p>
+                <p>Current Model: <span id="current-model-display">Loading...</span></p>
+            </div>
+            
+            <div class="settings-section">
+                <h3>Credits</h3>
+                <p>Developed by NumAI Team</p>
+                <p>© 2025 NumAI. All rights reserved.</p>
+            </div>
+        </div>
+    </div>
+</div>
