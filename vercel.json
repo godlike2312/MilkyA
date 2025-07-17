@@ -9,8 +9,7 @@
   "routes": [
     {
       "src": "/(.*)",
-      "dest": "/api/app.py",
-      "bypass": true
+      "dest": "/api/app.py"
     }
   ]
 }
