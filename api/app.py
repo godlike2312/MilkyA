@@ -406,7 +406,7 @@ def status():
 def index():
     return render_template('index.html')
 
-# New route for initial token verification
+# New route for initial token verification - now bypasses actual verification until chat starts
 @app.route('/api/verify-token', methods=['POST'])
 def verify_token():
     try:
@@ -428,28 +428,22 @@ def verify_token():
             print(f"Development mode - Using test user ID: {decoded_token['uid']}")
             return jsonify({'success': True, 'user_id': decoded_token['uid'], 'dev_mode': True})
         
-        # Verify Firebase token and store in session
-        print("Initial token verification - Attempting to verify Firebase token...")
-        decoded_token = verify_firebase_token(request)
+        # Skip actual token verification on page load - we'll verify when user starts chat
+        print("Initial page load - Skipping token verification until chat starts")
         
-        # Only bypass authentication in debug mode if verification failed
-        if app.debug and not decoded_token:
-            print("WARNING: Running in debug mode. Bypassing token verification.")
+        # For development/testing purposes only
+        if app.debug:
+            print("WARNING: Running in debug mode. Using test user ID.")
             decoded_token = {"uid": "test-user-id"}
             # Store the test token in session
             session['firebase_token'] = decoded_token
             expiry_time = datetime.now() + timedelta(hours=1)
             session['token_expiry'] = expiry_time.isoformat()
+            return jsonify({'success': True, 'user_id': decoded_token['uid'], 'dev_mode': True})
         
-        if not decoded_token:
-            print("Initial token verification - Authentication failed: No valid token provided")
-            return jsonify({'error': 'Unauthorized. Please log in.'}), 401
-        
-        # Get user ID from token
-        user_id = decoded_token.get('uid')
-        print(f"Initial token verification - Authenticated user: {user_id}")
-        
-        return jsonify({'success': True, 'user_id': user_id})
+        # In production, we'll just return success without actual verification
+        # The actual verification will happen when the user starts a chat
+        return jsonify({'success': True})
     except Exception as e:
         print(f"Initial token verification - Error: {str(e)}")
         traceback.print_exc()
