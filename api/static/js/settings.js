@@ -3,15 +3,24 @@
 // DOM Elements
 const settingsContainer = document.getElementById('settings-container');
 const closeSettingsBtn = document.getElementById('close-settings');
+<<<<<<< HEAD
 const userInfoBtn = document.querySelector('.user-info');
 const settingsTabs = document.querySelectorAll('.settings-tabs .tab');
 const tabContents = document.querySelectorAll('.tab-content');
 const themeOptions = document.querySelectorAll('.theme-option');
 const voiceOptions = document.querySelectorAll('.voice-option');
+=======
+const settingsTabs = document.querySelectorAll('.tab');
+const tabContents = document.querySelectorAll('.tab-content');
+const themeOptions = document.querySelectorAll('.theme-option');
+const voiceOptions = document.querySelectorAll('.voice-option:not(#advanced-tab .voice-option)');
+const advancedVoiceOptions = document.querySelectorAll('#advanced-tab .voice-option');
+>>>>>>> a5da6eb90ea3d1119c2328a05bdfdb6bb3f1e189
 const languageSelector = document.getElementById('language-selector');
 const exportChatsBtn = document.getElementById('export-chats');
 const deleteAllChatsBtn = document.getElementById('delete-all-chats');
 const deleteAccountBtn = document.getElementById('delete-account');
+<<<<<<< HEAD
 
 // Initialize settings
 document.addEventListener('DOMContentLoaded', () => {
@@ -300,18 +309,37 @@ function stopAudioVisualization() {
         // but we ensure it's suspended to stop audio processing
     }
 }
+=======
+const userInfoBtn = document.querySelector('.user-info');
+
+// Initialize settings
+document.addEventListener('DOMContentLoaded', () => {
+    applySavedPreferences();
+    initializeSettings();
+    initVoices();
+});
+
+>>>>>>> a5da6eb90ea3d1119c2328a05bdfdb6bb3f1e189
 // Initialize settings functionality
 function initializeSettings() {
     // Open settings when user info is clicked
     if (userInfoBtn) {
         userInfoBtn.addEventListener('click', openSettings);
     }
+<<<<<<< HEAD
 
+=======
+    
+>>>>>>> a5da6eb90ea3d1119c2328a05bdfdb6bb3f1e189
     // Close settings when close button is clicked
     if (closeSettingsBtn) {
         closeSettingsBtn.addEventListener('click', closeSettings);
     }
+<<<<<<< HEAD
 
+=======
+    
+>>>>>>> a5da6eb90ea3d1119c2328a05bdfdb6bb3f1e189
     // Tab switching
     settingsTabs.forEach(tab => {
         tab.addEventListener('click', () => {
@@ -319,24 +347,37 @@ function initializeSettings() {
             switchTab(tabId);
         });
     });
+<<<<<<< HEAD
 
+=======
+    
+>>>>>>> a5da6eb90ea3d1119c2328a05bdfdb6bb3f1e189
     // Theme selection
     themeOptions.forEach(option => {
         option.addEventListener('click', () => {
             const theme = option.getAttribute('data-theme');
             setTheme(theme);
+<<<<<<< HEAD
 
+=======
+            
+>>>>>>> a5da6eb90ea3d1119c2328a05bdfdb6bb3f1e189
             // Update active state
             themeOptions.forEach(opt => opt.classList.remove('active'));
             option.classList.add('active');
         });
     });
+<<<<<<< HEAD
 
+=======
+    
+>>>>>>> a5da6eb90ea3d1119c2328a05bdfdb6bb3f1e189
     // Voice selection
     voiceOptions.forEach(option => {
         option.addEventListener('click', () => {
             const voice = option.getAttribute('data-voice');
             setVoice(voice);
+<<<<<<< HEAD
 
             // Update active state
             voiceOptions.forEach(opt => opt.classList.remove('active'));
@@ -347,6 +388,19 @@ function initializeSettings() {
         });
     });
 
+=======
+        });
+    });
+    
+    // Advanced voice selection
+    advancedVoiceOptions.forEach(option => {
+        option.addEventListener('click', () => {
+            const voice = option.getAttribute('data-voice');
+            setVoice(voice);
+        });
+    });
+    
+>>>>>>> a5da6eb90ea3d1119c2328a05bdfdb6bb3f1e189
     // Language selection
     if (languageSelector) {
         languageSelector.addEventListener('change', () => {
@@ -354,6 +408,7 @@ function initializeSettings() {
             setLanguage(language);
         });
     }
+<<<<<<< HEAD
 
     // Advanced tab voice selection
     const selectVoiceBtn = document.getElementById('select-voice-btn');
@@ -530,10 +585,14 @@ function initializeSettings() {
         });
     }
 
+=======
+    
+>>>>>>> a5da6eb90ea3d1119c2328a05bdfdb6bb3f1e189
     // Data management buttons
     if (exportChatsBtn) {
         exportChatsBtn.addEventListener('click', exportChats);
     }
+<<<<<<< HEAD
 
     if (deleteAllChatsBtn) {
         deleteAllChatsBtn.addEventListener('click', confirmDeleteAllChats);
@@ -546,11 +605,28 @@ function initializeSettings() {
     // Load user profile data
     loadUserProfile();
 
+=======
+    
+    if (deleteAllChatsBtn) {
+        deleteAllChatsBtn.addEventListener('click', confirmDeleteAllChats);
+    }
+    
+    if (deleteAccountBtn) {
+        deleteAccountBtn.addEventListener('click', confirmDeleteAccount);
+    }
+    
+    // Load user profile data
+    loadUserProfile();
+    
+>>>>>>> a5da6eb90ea3d1119c2328a05bdfdb6bb3f1e189
     // Load saved voice preference
     loadSavedVoice();
 }
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> a5da6eb90ea3d1119c2328a05bdfdb6bb3f1e189
 // Open settings panel
 function openSettings() {
     if (settingsContainer) {
@@ -603,6 +679,7 @@ function setVoice(voiceId) {
     localStorage.setItem('selectedVoice', voiceId);
     console.log('Voice set to:', voiceId);
     
+<<<<<<< HEAD
     // Update UI to show active voice
     document.querySelectorAll('.voice-option').forEach(option => {
         option.classList.remove('active');
@@ -734,10 +811,85 @@ function previewVoice(voiceId) {
     
     // Stop any currently playing audio and animation
     stopAudioVisualization();
+=======
+    // Update UI to show active voice for regular voice options
+    voiceOptions.forEach(option => {
+        const optionVoice = option.getAttribute('data-voice');
+        if (optionVoice === voiceId) {
+            option.classList.add('active');
+        } else {
+            option.classList.remove('active');
+        }
+    });
+    
+    // Update UI for advanced voice options
+    advancedVoiceOptions.forEach(option => {
+        const optionVoice = option.getAttribute('data-voice');
+        if (optionVoice === voiceId) {
+            option.classList.add('active');
+        } else {
+            option.classList.remove('active');
+        }
+    });
+    
+    // Preview the selected voice
+    previewVoice(voiceId);
+}
+
+// Function to preview the selected voice
+function previewVoice(voiceId) {
+    const previewText = "Hello, I'm your AI assistant.";
+    
+    // Map the voice option to Edge TTS voice ID
+    let edgeVoiceId = 'en-US-AvaNeural'; // Default voice
+    
+    switch(voiceId) {
+        case 'male-1':
+            edgeVoiceId = 'en-AU-WilliamNeural';
+            break;
+        case 'male-2':
+            edgeVoiceId = 'en-GB-RyanNeural';
+            break;
+        case 'male-3':
+            edgeVoiceId = 'en-NZ-MitchellNeural';
+            break;
+        case 'male-4':
+            edgeVoiceId = 'en-US-GuyNeural';
+            break;
+        case 'male-5':
+            edgeVoiceId = 'en-CA-LiamNeural';
+            break;
+        case 'male-6':
+            edgeVoiceId = 'en-IN-PrabhatNeural';
+            break;
+        case 'female-1':
+            edgeVoiceId = 'en-AU-NatashaNeural';
+            break;
+        case 'female-2':
+            edgeVoiceId = 'en-GB-SoniaNeural';
+            break;
+        case 'female-3':
+            edgeVoiceId = 'en-US-AvaNeural';
+            break;
+        case 'female-4':
+            edgeVoiceId = 'en-US-JennyNeural';
+            break;
+        case 'female-5':
+            edgeVoiceId = 'en-CA-ClaraNeural';
+            break;
+        case 'female-6':
+            edgeVoiceId = 'en-IN-NeerjaNeural';
+            break;
+    }
+    
+    // Log the selected voice for debugging
+    console.log('Selected voice:', edgeVoiceId);
+>>>>>>> a5da6eb90ea3d1119c2328a05bdfdb6bb3f1e189
     
     // Stop any currently playing audio
     if (window.previewAudio) {
         window.previewAudio.pause();
+<<<<<<< HEAD
         window.previewAudio.onended = null; // Remove event listener
         window.previewAudio.onplay = null; // Remove event listener
         window.previewAudio = null;
@@ -756,17 +908,29 @@ function previewVoice(voiceId) {
     
     // Make a request to the server to generate speech using Edge TTS
     fetch('/api/edge-tts', {
+=======
+        window.previewAudio = null;
+    }
+    
+    // Call the Edge TTS API
+    fetch('/api/tts', {
+>>>>>>> a5da6eb90ea3d1119c2328a05bdfdb6bb3f1e189
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
         },
         body: JSON.stringify({
             text: previewText,
+<<<<<<< HEAD
             voice: voiceId
+=======
+            voice: edgeVoiceId
+>>>>>>> a5da6eb90ea3d1119c2328a05bdfdb6bb3f1e189
         })
     })
     .then(response => response.json())
     .then(data => {
+<<<<<<< HEAD
         // Create audio from base64 data
         const audioData = atob(data.audio);
         const arrayBuffer = new ArrayBuffer(audioData.length);
@@ -896,6 +1060,55 @@ function loadSavedVoice() {
     if (voiceOption) {
         setVoice(savedVoice);
     }
+=======
+        if (data.error) {
+            console.error('TTS Error:', data.error);
+            return;
+        }
+        
+        // Create and play audio element
+        const audio = new Audio(data.audio_url);
+        window.previewAudio = audio;
+        audio.play();
+        
+        audio.onended = () => {
+            window.previewAudio = null;
+        };
+        
+        audio.onerror = () => {
+            console.error('Audio playback error');
+            window.previewAudio = null;
+        };
+    })
+    .catch(error => {
+        console.error('TTS API Error:', error);
+    });
+}
+
+// Load saved voice preference
+function loadSavedVoice() {
+    const savedVoice = localStorage.getItem('selectedVoice') || 'female-2'; // Default to Emily
+    
+    // Update UI for regular voice options
+    voiceOptions.forEach(option => {
+        const optionVoice = option.getAttribute('data-voice');
+        if (optionVoice === savedVoice) {
+            option.classList.add('active');
+        } else {
+            option.classList.remove('active');
+        }
+    });
+    
+    // Update UI for advanced voice options
+    advancedVoiceOptions.forEach(option => {
+        const optionVoice = option.getAttribute('data-voice');
+        if (optionVoice === savedVoice) {
+            option.classList.add('active');
+        } else {
+            option.classList.remove('active');
+        }
+    });
+>>>>>>> a5da6eb90ea3d1119c2328a05bdfdb6bb3f1e189
 }
 
 // Set language
@@ -1058,12 +1271,21 @@ function applySavedPreferences() {
     // Apply saved voice preference
     loadSavedVoice();
     
+<<<<<<< HEAD
     // Initialize auto-speak toggle
     initAutoSpeakToggle();
+=======
+    // Ensure the correct tab is active based on URL hash
+    const hash = window.location.hash.substring(1);
+    if (hash && ['general', 'profile', 'advanced', 'about'].includes(hash)) {
+        switchTab(hash);
+    }
+>>>>>>> a5da6eb90ea3d1119c2328a05bdfdb6bb3f1e189
 }
 
 // Initialize speech synthesis voices
 function initVoices() {
+<<<<<<< HEAD
     if (window.speechSynthesis) {
         window.speechSynthesis.getVoices();
         
@@ -1077,3 +1299,25 @@ function initVoices() {
 
 // Apply saved preferences on page load
 document.addEventListener('DOMContentLoaded', applySavedPreferences);
+=======
+    // We're now using Edge TTS API instead of browser's SpeechSynthesis
+    // Fetch available voices from our API endpoint
+    fetch('/api/tts/voices')
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                console.error('Error fetching voices:', data.error);
+                return;
+            }
+            
+            console.log('Available Edge TTS voices:', data.voices);
+            // We don't need to do anything with the voices here
+            // as we're using predefined voice mappings in the UI
+        })
+        .catch(error => {
+            console.error('Error fetching voices:', error);
+        });
+}
+
+// Note: applySavedPreferences is now called in the main DOMContentLoaded event listener above
+>>>>>>> a5da6eb90ea3d1119c2328a05bdfdb6bb3f1e189

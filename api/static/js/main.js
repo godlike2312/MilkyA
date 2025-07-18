@@ -44,6 +44,33 @@ offlineIndicator.textContent = 'You are currently offline';
 offlineIndicator.style.display = 'none';
 document.body.appendChild(offlineIndicator);
 
+<<<<<<< HEAD
+=======
+// Function to verify Firebase token once when user logs in
+async function verifyTokenOnce() {
+    if (firebase.auth().currentUser) {
+        try {
+            const token = await firebase.auth().currentUser.getIdToken(true);
+            const response = await fetch('/api/verify-token', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+            
+            if (response.ok) {
+                console.log('Token verified and cached on server');
+            } else {
+                console.error('Failed to verify token on server');
+            }
+        } catch (error) {
+            console.error('Error verifying token:', error);
+        }
+    }
+}
+
+>>>>>>> a5da6eb90ea3d1119c2328a05bdfdb6bb3f1e189
 // Check if user is online
 function checkOnlineStatus() {
     if (navigator.onLine) {
@@ -819,6 +846,7 @@ function addMessage(content, type, isOfflineMessage = false, modelId = null) {
             });
         });
         
+<<<<<<< HEAD
         speakBtn.addEventListener('click', async () => {
             // Check if already speaking - toggle off if active
             if (speakBtn.classList.contains('active')) {
@@ -998,6 +1026,108 @@ function addMessage(content, type, isOfflineMessage = false, modelId = null) {
                 speakBtn.classList.remove('active');
                 speakBtn.innerHTML = '<i class="fas fa-volume-up"></i>';
             }
+=======
+        speakBtn.addEventListener('click', () => {
+            // Text-to-speech functionality using Edge TTS API
+            const textToSpeak = messageContent.textContent;
+            
+            // Check if audio is currently playing
+            if (window.currentAudio && !window.currentAudio.paused) {
+                // If audio is playing, stop it
+                window.currentAudio.pause();
+                window.currentAudio = null;
+                speakBtn.classList.remove('active');
+                return;
+            }
+            
+            // If no audio is playing, start new speech
+            speakBtn.classList.add('active');
+            
+            // Get the selected voice from localStorage
+            const savedVoice = localStorage.getItem('selectedVoice') || 'female-2';
+            let voiceId = 'en-US-AvaNeural'; // Default voice
+            
+            // Map the voice option to Edge TTS voice ID
+            switch(savedVoice) {
+                case 'male-1':
+                    voiceId = 'en-AU-WilliamNeural';
+                    break;
+                case 'male-2':
+                    voiceId = 'en-GB-RyanNeural';
+                    break;
+                case 'male-3':
+                    voiceId = 'en-NZ-MitchellNeural';
+                    break;
+                case 'male-4':
+                    voiceId = 'en-US-GuyNeural';
+                    break;
+                case 'male-5':
+                    voiceId = 'en-CA-LiamNeural';
+                    break;
+                case 'male-6':
+                    voiceId = 'en-IN-PrabhatNeural';
+                    break;
+                case 'female-1':
+                    voiceId = 'en-AU-NatashaNeural';
+                    break;
+                case 'female-2':
+                    voiceId = 'en-GB-SoniaNeural';
+                    break;
+                case 'female-3':
+                    voiceId = 'en-US-AvaNeural';
+                    break;
+                case 'female-4':
+                    voiceId = 'en-US-JennyNeural';
+                    break;
+                case 'female-5':
+                    voiceId = 'en-CA-ClaraNeural';
+                    break;
+                case 'female-6':
+                    voiceId = 'en-IN-NeerjaNeural';
+                    break;
+            }
+            
+            // Call the Edge TTS API
+            fetch('/api/tts', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    text: textToSpeak,
+                    voice: voiceId
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    console.error('TTS Error:', data.error);
+                    speakBtn.classList.remove('active');
+                    return;
+                }
+                
+                // Create and play audio element
+                const audio = new Audio(data.audio_url);
+                window.currentAudio = audio;
+                audio.play();
+                
+                audio.onended = () => {
+                    speakBtn.classList.remove('active');
+                    window.currentAudio = null;
+                };
+                
+                audio.onerror = () => {
+                    console.error('Audio playback error');
+                    speakBtn.classList.remove('active');
+                    window.currentAudio = null;
+                };
+            })
+            .catch(error => {
+                console.error('TTS API Error:', error);
+                speakBtn.classList.remove('active');
+                window.currentAudio = null;
+            });
+>>>>>>> a5da6eb90ea3d1119c2328a05bdfdb6bb3f1e189
         });
     }
     
@@ -1169,8 +1299,14 @@ function removeLoadingIndicator(loadingDiv) {
 let isResponding = false;
 
 // Function to send a message to the API
+<<<<<<< HEAD
 // Function to send a message to the API
 async function sendMessage(message) {
+=======
+async function sendMessage(message) {
+    // Make this function globally accessible for voice input
+    window.sendMessage = sendMessage;
+>>>>>>> a5da6eb90ea3d1119c2328a05bdfdb6bb3f1e189
     try {
         userInput.disabled = true;
         sendButton.disabled = true;
@@ -1181,7 +1317,14 @@ async function sendMessage(message) {
         controller = new AbortController();
         const signal = controller.signal;
 
+<<<<<<< HEAD
         chatHistory.push({ role: 'user', content: message });
+=======
+        chatHistory.push({
+            role: 'user',
+            content: message
+        });
+>>>>>>> a5da6eb90ea3d1119c2328a05bdfdb6bb3f1e189
 
         if (currentChatId && currentUser) {
             const messageData = {
@@ -1243,30 +1386,51 @@ async function sendMessage(message) {
 
         const data = await response.json();
         const content = data.response;
+<<<<<<< HEAD
 
         if (content) {
             // Create assistant message UI element
             const messageDiv = document.createElement('div');
             messageDiv.classList.add('message', 'assistant');
+=======
+        let formattedContent = '';
+
+        if (content) {
+            const messageDiv = document.createElement('div');
+            messageDiv.classList.add('message', 'assistant');
+
+>>>>>>> a5da6eb90ea3d1119c2328a05bdfdb6bb3f1e189
             const messageContent = document.createElement('div');
             messageContent.classList.add('message-content');
             messageDiv.appendChild(messageContent);
             chatMessages.appendChild(messageDiv);
+<<<<<<< HEAD
 
+=======
+>>>>>>> a5da6eb90ea3d1119c2328a05bdfdb6bb3f1e189
             gsap.set(messageDiv, { opacity: 0, y: 20 });
             gsap.to(messageDiv, { opacity: 1, y: 0, duration: 0.5, ease: 'power2.out' });
             chatMessages.scrollTop = chatMessages.scrollHeight;
 
+<<<<<<< HEAD
             // Markdown & Emoji rendering
+=======
+>>>>>>> a5da6eb90ea3d1119c2328a05bdfdb6bb3f1e189
             const renderEmojiMarkdown = (text) => {
                 const renderer = new marked.Renderer();
                 const originalText = renderer.text;
                 const originalLink = renderer.link;
+<<<<<<< HEAD
 
+=======
+                
+                // Override link renderer to make links open in new tabs
+>>>>>>> a5da6eb90ea3d1119c2328a05bdfdb6bb3f1e189
                 renderer.link = function(href, title, text) {
                     const link = originalLink.call(this, href, title, text);
                     return link.replace('<a ', '<a target="_blank" rel="noopener noreferrer" ');
                 };
+<<<<<<< HEAD
 
                 renderer.text = function(text) {
                     if (typeof text !== 'string') return originalText.call(this, text);
@@ -1324,10 +1488,169 @@ async function sendMessage(message) {
             chatHistory.push({ role: 'assistant', content });
             if (currentChatId && currentUser) {
                 saveMessageToChat(currentChatId, {
+=======
+                
+                // Override text renderer to handle emojis in text content
+                renderer.text = function(text) {
+                    if (typeof text !== 'string') return originalText.call(this, text);
+                    // Process emojis in the text content
+                    if (window.replaceEmojis && typeof window.replaceEmojis === 'function') {
+                        return originalText.call(this, text);
+                    }
+                    return originalText.call(this, text);
+                };
+                
+                // First render the markdown
+                const renderedMarkdown = marked.parse(text, { renderer });
+                
+                // Then use the external emoji replacement function for the entire content
+                if (window.replaceEmojis && typeof window.replaceEmojis === 'function') {
+                    return window.replaceEmojis(renderedMarkdown);
+                }
+                
+                // Fallback if replaceEmojis is not available
+                return renderedMarkdown;
+            };
+
+            // Store the complete content for use if the response is stopped
+            const completeContent = content;
+            let isTypingCancelled = false;
+            
+            // Function to check if typing should be cancelled
+            const shouldCancelTyping = () => {
+                return !isResponding || isTypingCancelled;
+            };
+            
+            try {
+                if (content.includes('```')) {
+                    // Add CSS for typing animation transition if not already added
+                    if (!document.getElementById('typing-animation-style')) {
+                        const style = document.createElement('style');
+                        style.id = 'typing-animation-style';
+                        style.textContent = `
+                            .typing-animation {
+                                transition: all 0.1s ease-in-out;
+                                display: inline-block;
+                            }
+                        `;
+                        document.head.appendChild(style);
+                    }
+                    
+                    // Add typing animation class
+                    messageContent.classList.add('typing-animation');
+                    
+                    const parts = content.split('```');
+                    let processedParts = parts.map(() => '');
+                    
+                    // Faster typing speed with chunking for code blocks
+                    const chunkSize = 100; // Process more characters at once for code blocks
+                    const typingDelay = 10; // Minimal delay between chunks for maximum speed
+                    const codeDelimiterDelay = 10; // Minimal delay between code sections
+                    
+                    for (let i = 0; i < parts.length; i++) {
+                        const part = parts[i];
+                        
+                        // Process part in chunks
+                        for (let j = 0; j < part.length; j += chunkSize) {
+                            // Check if typing should be cancelled
+                            if (shouldCancelTyping()) {
+                                throw new Error('Typing cancelled');
+                            }
+                            
+                            // Process a chunk of characters at once
+                            const chunk = part.substring(j, Math.min(j + chunkSize, part.length));
+                            processedParts[i] += chunk;
+                            
+                            // Update content and wait
+                            const currentContent = processedParts.join('```');
+                            messageContent.innerHTML = renderEmojiMarkdown(currentContent);
+                            
+                            // Always scroll to the bottom during typing animation
+                            chatMessages.scrollTop = chatMessages.scrollHeight;
+                            
+                            await new Promise(r => setTimeout(r, typingDelay));
+                        }
+                        
+                        // Add a slight pause between code and non-code sections
+                        if (i < parts.length - 1) {
+                            if (shouldCancelTyping()) {
+                                throw new Error('Typing cancelled');
+                            }
+                            await new Promise(r => setTimeout(r, codeDelimiterDelay));
+                        }
+                    }
+                    
+                    // Remove typing animation class when done
+                    messageContent.classList.remove('typing-animation');
+                } else {
+                    // Add CSS for typing animation transition
+                    const style = document.createElement('style');
+                    style.textContent = `
+                        @keyframes typing-cursor {
+                            0% { border-right-color: var(--text-color); }
+                            50% { border-right-color: transparent; }
+                            100% { border-right-color: var(--text-color); }
+                        }
+                        .typing-animation {
+                            border-right: 2px solid var(--text-color);
+                            animation: typing-cursor 0.8s infinite;
+                            transition: all 0.1s ease-in-out;
+                            display: inline-block;
+                            padding-right: 2px;
+                        }
+                    `;
+                    document.head.appendChild(style);
+                    
+                    // Add typing animation class
+                    messageContent.classList.add('typing-animation');
+                    
+                    // Faster typing speed - process characters in chunks for better performance
+                    const chunkSize = 15; // Process 15 characters at a time for faster typing
+                    const typingDelay = 0; // No delay between chunks for maximum speed
+                    
+                    for (let i = 0; i < content.length; i += chunkSize) {
+                        // Check if typing should be cancelled before each chunk
+                        if (shouldCancelTyping()) {
+                            throw new Error('Typing cancelled');
+                        }
+                        
+                        // Process a chunk of characters at once
+                        const chunk = content.substring(i, Math.min(i + chunkSize, content.length));
+                        formattedContent += chunk;
+                        
+                        // Update content and wait
+                        messageContent.innerHTML = renderEmojiMarkdown(formattedContent);
+                        // Always scroll to the bottom during typing animation
+                        chatMessages.scrollTop = chatMessages.scrollHeight;
+                        
+                        await new Promise(r => setTimeout(r, typingDelay));
+                    }
+                    
+                    // Remove typing animation class when done
+                    messageContent.classList.remove('typing-animation');
+                }
+            } catch (error) {
+                if (error.message === 'Typing cancelled') {
+                    console.log('Typing animation cancelled');
+                    // Display the full content immediately when cancelled
+                    messageContent.innerHTML = renderEmojiMarkdown(completeContent);
+                    // Always scroll to the bottom when typing is cancelled
+                    chatMessages.scrollTop = chatMessages.scrollHeight;
+                } else {
+                    throw error; // Re-throw other errors
+                }
+            }
+
+            chatHistory.push({ role: 'assistant', content });
+
+            if (currentChatId && currentUser) {
+                const messageData = {
+>>>>>>> a5da6eb90ea3d1119c2328a05bdfdb6bb3f1e189
                     role: 'assistant',
                     content,
                     modelId: currentModel,
                     timestamp: firebase.firestore.FieldValue.serverTimestamp()
+<<<<<<< HEAD
                 });
             }
 
@@ -1339,10 +1662,36 @@ async function sendMessage(message) {
             modelWatermark.classList.add('model-watermark');
             const modelIdToUse = currentModel;
             let modelName = availableModels?.[modelIdToUse]?.display_name || modelIdToUse.replace(/-/g, ' ');
+=======
+                };
+                saveMessageToChat(currentChatId, messageData);
+            }
+
+            // Add feedback options for the assistant message
+            const feedbackContainer = document.createElement('div');
+            feedbackContainer.classList.add('message-feedback');
+            
+            // Add model watermark to show which model was used
+            const modelWatermark = document.createElement('div');
+            modelWatermark.classList.add('model-watermark');
+            // Use the current model
+            const modelIdToUse = currentModel;
+            
+            // Ensure we have a valid model name even if availableModels isn't loaded yet
+            let modelName = 'Unknown Model';
+            if (availableModels && availableModels[modelIdToUse] && availableModels[modelIdToUse].display_name) {
+                modelName = availableModels[modelIdToUse].display_name;
+            } else if (modelIdToUse) {
+                // If availableModels isn't loaded yet, use a formatted version of the ID
+                modelName = modelIdToUse.charAt(0).toUpperCase() + modelIdToUse.slice(1).replace(/-/g, ' ');
+            }
+            
+>>>>>>> a5da6eb90ea3d1119c2328a05bdfdb6bb3f1e189
             modelWatermark.textContent = `Model Used: ${modelName}`;
             modelWatermark.setAttribute('data-model-id', modelIdToUse || '');
             feedbackContainer.appendChild(modelWatermark);
             
+<<<<<<< HEAD
             // Auto-speak functionality if enabled in settings
             const autoSpeakEnabled = localStorage.getItem('autoSpeakEnabled') === 'true';
             if (autoSpeakEnabled) {
@@ -1432,19 +1781,36 @@ async function sendMessage(message) {
 
             const feedbackButtons = document.createElement('div');
             feedbackButtons.classList.add('feedback-buttons');
+=======
+            // Create feedback buttons container
+            const feedbackButtons = document.createElement('div');
+            feedbackButtons.classList.add('feedback-buttons');
+            
+            // Add feedback buttons
+>>>>>>> a5da6eb90ea3d1119c2328a05bdfdb6bb3f1e189
             feedbackButtons.innerHTML = `
                 <button class="feedback-btn like-btn" title="Like"><i class="fas fa-thumbs-up"></i></button>
                 <button class="feedback-btn dislike-btn" title="Dislike"><i class="fas fa-thumbs-down"></i></button>
                 <button class="feedback-btn copy-btn" title="Copy"><i class="fas fa-copy"></i></button>
                 <button class="feedback-btn speak-btn" title="Speak"><i class="fas fa-volume-up"></i></button>
             `;
+<<<<<<< HEAD
             feedbackContainer.appendChild(feedbackButtons);
             messageDiv.appendChild(feedbackContainer);
 
+=======
+            
+            // Append feedback buttons to the container
+            feedbackContainer.appendChild(feedbackButtons);
+            messageDiv.appendChild(feedbackContainer);
+            
+            // Add event listeners for feedback buttons
+>>>>>>> a5da6eb90ea3d1119c2328a05bdfdb6bb3f1e189
             const likeBtn = feedbackButtons.querySelector('.like-btn');
             const dislikeBtn = feedbackButtons.querySelector('.dislike-btn');
             const copyBtn = feedbackButtons.querySelector('.copy-btn');
             const speakBtn = feedbackButtons.querySelector('.speak-btn');
+<<<<<<< HEAD
 
             likeBtn.addEventListener('click', () => {
                 likeBtn.classList.toggle('active');
@@ -1458,12 +1824,34 @@ async function sendMessage(message) {
 
             copyBtn.addEventListener('click', () => {
                 navigator.clipboard.writeText(messageContent.textContent).then(() => {
+=======
+            
+            likeBtn.addEventListener('click', () => {
+                likeBtn.classList.toggle('active');
+                if (dislikeBtn.classList.contains('active')) {
+                    dislikeBtn.classList.remove('active');
+                }
+            });
+            
+            dislikeBtn.addEventListener('click', () => {
+                dislikeBtn.classList.toggle('active');
+                if (likeBtn.classList.contains('active')) {
+                    likeBtn.classList.remove('active');
+                }
+            });
+            
+            copyBtn.addEventListener('click', () => {
+                // Get text content from the message
+                const textToCopy = messageContent.textContent;
+                navigator.clipboard.writeText(textToCopy).then(() => {
+>>>>>>> a5da6eb90ea3d1119c2328a05bdfdb6bb3f1e189
                     copyBtn.innerHTML = '<i class="fas fa-check"></i>';
                     setTimeout(() => {
                         copyBtn.innerHTML = '<i class="fas fa-copy"></i>';
                     }, 2000);
                 });
             });
+<<<<<<< HEAD
 
             speakBtn.addEventListener('click', async () => {
                 if (speakBtn.classList.contains('active')) {
@@ -1612,11 +2000,111 @@ async function sendMessage(message) {
                     speakBtn.classList.remove('active');
                     speakBtn.innerHTML = '<i class="fas fa-volume-up"></i>';
                 }
+=======
+            
+            speakBtn.addEventListener('click', () => {
+                // Text-to-speech functionality using Edge TTS API
+                const textToSpeak = messageContent.textContent;
+                speakBtn.classList.add('active');
+                
+                // Get the selected voice from localStorage
+                const savedVoice = localStorage.getItem('selectedVoice') || 'female-2';
+                let voiceId = 'en-US-AvaNeural'; // Default voice
+                
+                // Map the voice option to Edge TTS voice ID
+                switch(savedVoice) {
+                    case 'male-1':
+                        voiceId = 'en-AU-WilliamNeural';
+                        break;
+                    case 'male-2':
+                        voiceId = 'en-GB-RyanNeural';
+                        break;
+                    case 'male-3':
+                        voiceId = 'en-NZ-MitchellNeural';
+                        break;
+                    case 'male-4':
+                        voiceId = 'en-US-GuyNeural';
+                        break;
+                    case 'male-5':
+                        voiceId = 'en-CA-LiamNeural';
+                        break;
+                    case 'male-6':
+                        voiceId = 'en-IN-PrabhatNeural';
+                        break;
+                    case 'female-1':
+                        voiceId = 'en-AU-NatashaNeural';
+                        break;
+                    case 'female-2':
+                        voiceId = 'en-GB-SoniaNeural';
+                        break;
+                    case 'female-3':
+                        voiceId = 'en-US-AvaNeural';
+                        break;
+                    case 'female-4':
+                        voiceId = 'en-US-JennyNeural';
+                        break;
+                    case 'female-5':
+                        voiceId = 'en-CA-ClaraNeural';
+                        break;
+                    case 'female-6':
+                        voiceId = 'en-IN-NeerjaNeural';
+                        break;
+                }
+                
+                // Stop any currently playing audio
+                if (window.currentAudio) {
+                    window.currentAudio.pause();
+                    window.currentAudio = null;
+                }
+                
+                // Call the Edge TTS API
+                fetch('/api/tts', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        text: textToSpeak,
+                        voice: voiceId
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        console.error('TTS Error:', data.error);
+                        speakBtn.classList.remove('active');
+                        return;
+                    }
+                    
+                    // Create and play audio element
+                    const audio = new Audio(data.audio_url);
+                    window.currentAudio = audio;
+                    audio.play();
+                    
+                    audio.onended = () => {
+                        speakBtn.classList.remove('active');
+                        window.currentAudio = null;
+                    };
+                    
+                    audio.onerror = () => {
+                        console.error('Audio playback error');
+                        speakBtn.classList.remove('active');
+                    };
+                })
+                .catch(error => {
+                    console.error('TTS API Error:', error);
+                    speakBtn.classList.remove('active');
+                });
+>>>>>>> a5da6eb90ea3d1119c2328a05bdfdb6bb3f1e189
             });
         } else if (data.error) {
             addMessage(`Error: ${data.error}`, 'system');
         }
 
+<<<<<<< HEAD
+=======
+        // Reset UI
+>>>>>>> a5da6eb90ea3d1119c2328a05bdfdb6bb3f1e189
         userInput.disabled = false;
         sendButton.disabled = false;
         sendButton.style.display = 'flex';
@@ -1630,7 +2118,17 @@ async function sendMessage(message) {
         if (error.name !== 'AbortError') {
             if (error.message.includes('API key')) {
                 addMessage('Error: The API key is missing or invalid. Please check the server configuration.', 'system');
+<<<<<<< HEAD
             } else {
+=======
+            } else if (!(
+                error.message.includes('modelIdToNameMap') ||
+                error.message.includes('undefined') ||
+                error.message.includes('processing the response') ||
+                error.message.includes('Cannot read properties') ||
+                error.message.includes('is not a function')
+            )) {
+>>>>>>> a5da6eb90ea3d1119c2328a05bdfdb6bb3f1e189
                 addMessage(`An error occurred: ${error.message}`, 'system');
             }
         }
@@ -1645,7 +2143,10 @@ async function sendMessage(message) {
     }
 }
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> a5da6eb90ea3d1119c2328a05bdfdb6bb3f1e189
 // Add event listener for stop button
 if (stopBtn) {
     stopBtn.addEventListener('click', () => {
@@ -3481,6 +3982,7 @@ if (document.body) {
   });
 }
 
+<<<<<<< HEAD
 // Function to show a notification for text-to-speech events
 // TTS notification function removed
 
@@ -3572,3 +4074,5 @@ function processTextForSpeech(messageContentElement) {
     return text;
 }
 
+=======
+>>>>>>> a5da6eb90ea3d1119c2328a05bdfdb6bb3f1e189

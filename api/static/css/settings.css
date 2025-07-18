@@ -6,7 +6,12 @@
     transform: translate(-50%, -50%) scale(0.9);
     width: 400px;
     max-height: 80vh;
+<<<<<<< HEAD
     background-color: var(--send-text);
+=======
+    background-color: var(--sidebar-bg);
+    background-image: linear-gradient(to bottom, var(--sidebar-bg), var(--bg-color));
+>>>>>>> a5da6eb90ea3d1119c2328a05bdfdb6bb3f1e189
     border: 1px solid var(--border-color);
     border-radius: 10px;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
@@ -249,7 +254,12 @@
     background-color: var(--theme-active);
 }
 
+<<<<<<< HEAD
 .theme-option.active .theme-preview {
+=======
+.theme-option.active .theme-preview,
+.voice-option.active {
+>>>>>>> a5da6eb90ea3d1119c2328a05bdfdb6bb3f1e189
     border-color: var(--primary-color);
     box-shadow: 0 6px 12px rgba(79, 172, 254, 0.3);
     transform: scale(1.05);
@@ -264,6 +274,7 @@
     color: var(--primary-color);
 }
 
+<<<<<<< HEAD
 /* Voice Selector */
 .voice-selector {
     margin-top: 15px;
@@ -670,6 +681,8 @@ input:checked + .toggle-slider:before {
     color: var(--primary-color);
 }
 
+=======
+>>>>>>> a5da6eb90ea3d1119c2328a05bdfdb6bb3f1e189
 /* Language Selector */
 .language-selector, .model-selector {
     width: 100%;
