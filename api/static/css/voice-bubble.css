@@ -21,12 +21,8 @@
     justify-content: center;
     overflow: hidden;
     box-shadow: 0 0 30px rgba(0, 0, 0, 0.3), inset 0 0 15px rgba(255, 255, 255, 0.2);
-<<<<<<< HEAD
     transition: transform 0.1s ease-out, box-shadow 0.3s ease;
     will-change: transform;
-=======
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
->>>>>>> a5da6eb90ea3d1119c2328a05bdfdb6bb3f1e189
     margin-bottom: 30px; /* Increased from 20px */
     border: 2px solid var(--accent-color); /* Added border */
 }
