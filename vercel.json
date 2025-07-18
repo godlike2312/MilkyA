@@ -3,10 +3,19 @@
   "builds": [
     {
       "src": "api/index.py",
-      "use": "@vercel/python"
+      "use": "@vercel/python",
+      "config": {
+        "runtime": "python3.9",
+        "fluidCompute": true,
+        "maxDuration": 60
+      }
     }
   ],
   "routes": [
+    {
+      "src": "/api/tts/health",
+      "dest": "/api/index.py"
+    },
     {
       "src": "/(.*)",
       "dest": "/api/index.py"
