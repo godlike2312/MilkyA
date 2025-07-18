@@ -1,0 +1,48 @@
+/*
+  Highlight.js 11.9.0 (e5c8e4b3)
+  License: BSD-3-Clause
+  Copyright (c) 2006-2023, Ivan Sagalaev
+*/
+:root{--hljs-color:#fff;--hljs-background:#1c1b1b;--hljs-keyword:#c678dd;--hljs-built_in:#e6c07b;--hljs-type:#e6c07b;--hljs-literal:#56b6c2;--hljs-number:#d19a66;--hljs-regexp:#98c379;--hljs-string:#98c379;--hljs-subst:#e06c75;--hljs-symbol:#61aeee;--hljs-class:#e6c07b;--hljs-function:#61aeee;--hljs-title:#61aeee;--hljs-params:rgba(255, 255, 255, 0.85);--hljs-comment:#5c6370;--hljs-doctag:#c678dd;--hljs-meta:#61aeee;--hljs-meta-keyword:#c678dd;--hljs-meta-string:#98c379;--hljs-section:#e06c75;--hljs-tag:#e06c75;--hljs-name:#e06c75;--hljs-attr:#d19a66;--hljs-attribute:#98c379;--hljs-variable:#e06c75;--hljs-template-variable:#e06c75;--hljs-selector-tag:#e06c75;--hljs-selector-id:#61aeee;--hljs-selector-class:#d19a66;--hljs-selector-attr:#c678dd;--hljs-selector-pseudo:#d19a66;--hljs-bullet:#56b6c2;--hljs-code:#98c379;--hljs-emphasis:italic;--hljs-strong:bold;--hljs-formula:#98c379;--hljs-link:#61aeee;--hljs-quote:#5c6370;--hljs-selector-tag:#e06c75;--hljs-selector-id:#61aeee;--hljs-selector-class:#d19a66;--hljs-selector-attr:#c678dd;--hljs-selector-pseudo:#d19a66;--hljs-template-tag:#c678dd;--hljs-template-variable:#e06c75;--hljs-addition-background:rgba(152, 195, 121, 0.15);--hljs-addition:var(--hljs-string);--hljs-deletion-background:rgba(224, 108, 117, 0.15);--hljs-deletion:var(--hljs-tag)}
+
+/* Light mode overrides */
+body.light-mode{--hljs-color:#383a42;--hljs-background:#fafafa;--hljs-keyword:#a626a4;--hljs-built_in:#c18401;--hljs-type:#c18401;--hljs-literal:#0184bb;--hljs-number:#986801;--hljs-regexp:#50a14f;--hljs-string:#50a14f;--hljs-subst:#e45649;--hljs-symbol:#4078f2;--hljs-class:#c18401;--hljs-function:#4078f2;--hljs-title:#4078f2;--hljs-params:rgba(0, 0, 0, 0.85);--hljs-comment:#a0a1a7;--hljs-doctag:#a626a4;--hljs-meta:#4078f2;--hljs-meta-keyword:#a626a4;--hljs-meta-string:#50a14f;--hljs-section:#e45649;--hljs-tag:#e45649;--hljs-name:#e45649;--hljs-attr:#986801;--hljs-attribute:#50a14f;--hljs-variable:#e45649;--hljs-template-variable:#e45649;--hljs-selector-tag:#e45649;--hljs-selector-id:#4078f2;--hljs-selector-class:#986801;--hljs-selector-attr:#a626a4;--hljs-selector-pseudo:#986801;--hljs-bullet:#0184bb;--hljs-code:#50a14f;--hljs-addition-background:rgba(80, 161, 79, 0.15);--hljs-addition:var(--hljs-string);--hljs-deletion-background:rgba(228, 86, 73, 0.15);--hljs-deletion:var(--hljs-tag)}
+
+.hljs{color:var(--hljs-color);background:var(--hljs-background)}
+.hljs-comment,.hljs-quote{color:var(--hljs-comment);font-style:italic}
+.hljs-doctag,.hljs-keyword,.hljs-formula,.hljs-section,.hljs-name,.hljs-selector-tag,.hljs-deletion,.hljs-subst{color:var(--hljs-keyword)}
+.hljs-literal,.hljs-string,.hljs-regexp,.hljs-addition,.hljs-attribute,.hljs-meta .hljs-string{color:var(--hljs-string)}
+.hljs-built_in,.hljs-class .hljs-title,.hljs-title.class_{color:var(--hljs-built_in)}
+.hljs-attr,.hljs-variable,.hljs-template-variable,.hljs-type,.hljs-selector-class,.hljs-selector-attr,.hljs-selector-pseudo,.hljs-number{color:var(--hljs-number)}
+.hljs-symbol,.hljs-bullet,.hljs-link,.hljs-meta,.hljs-selector-id,.hljs-title{color:var(--hljs-symbol)}
+.hljs-emphasis{font-style:var(--hljs-emphasis)}
+.hljs-strong{font-weight:var(--hljs-strong)}
+.hljs-link{text-decoration:underline}
+
+/* Custom styles to match the app's design */
+.code-block .hljs {
+  background: transparent;
+  padding: 0;
+  border-radius: 0;
+  font-family: 'Roboto Mono', monospace;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.code-block pre {
+  margin: 0;
+  overflow-x: auto;
+  background: var(--code-bg);
+  border-radius: 0 0 8px 8px;
+}
+
+/* Ensure inline code is properly styled */
+.inline-code {
+  font-family: 'Roboto Mono', monospace;
+  background: rgba(var(--bg-secondary-rgb), 0.5);
+  padding: 0.2em 0.4em;
+  border-radius: 3px;
+  font-size: 0.9em;
+  white-space: pre-wrap;
+  word-break: break-word;
+}

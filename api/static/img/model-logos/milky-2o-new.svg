@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="48" height="48">
+  <!-- Background Circle with Gradient -->
+  <defs>
+    <linearGradient id="milky-2o-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#5D5DFF" />
+      <stop offset="100%" stop-color="#9D9DFF" />
+    </linearGradient>
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="2" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+  
+  <!-- Main Circle -->
+  <circle cx="24" cy="24" r="22" fill="url(#milky-2o-gradient)" opacity="0.2" />
+  
+  <!-- Stylized 2 with o -->
+  <g filter="url(#glow)">
+    <!-- Stylized 2 -->
+    <path d="M14,16 C14,14 16,12 20,12 C24,12 26,14 26,16 C26,20 14,24 14,28 L26,28" 
+          stroke="url(#milky-2o-gradient)" stroke-width="3" fill="none" stroke-linecap="round" />
+    
+    <!-- Letter o -->
+    <circle cx="36" cy="22" r="6" stroke="#FFFFFF" stroke-width="2" fill="none" />
+  </g>
+</svg>

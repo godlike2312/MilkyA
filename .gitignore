@@ -1,0 +1,23 @@
+# Firebase service account keys
+*firebase-adminsdk*.json
+firebase-service-account.json
+*service-account*.json
+*serviceAccount*.json
+
+# Python cache files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Environment variables
+.env
+
+# Virtual environment
+venv/
+env/
+.venv/
+
+# IDE files
+.vscode/
+.idea/
+.vercel

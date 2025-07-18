@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Generation - NumAI</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            background: #111216;
+            color: #f5f5f5;
+            min-height: 100vh;
+            margin: 0;
+            font-family: 'Inter', sans-serif;
+        }
+        .image-gen-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1.2rem 2.2rem 0.5rem 2.2rem;
+        }
+        .image-gen-logo {
+            display: flex;
+            align-items: center;
+            gap: 0.7rem;
+        }
+        .image-gen-logo img {
+            height: 36px;
+            width: 36px;
+        }
+        .image-gen-chat-btn {
+            background: linear-gradient(90deg, #a770ef 0%, #f6d365 100%);
+            color: #23272f;
+            border: none;
+            border-radius: 2rem;
+            font-weight: 700;
+            font-size: 1.1rem;
+            padding: 0.7rem 2.1rem;
+            cursor: pointer;
+            box-shadow: 0 2px 12px 0 rgba(167,112,239,0.12);
+            transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+        }
+        .image-gen-chat-btn:hover {
+            background: linear-gradient(90deg, #f6d365 0%, #a770ef 100%);
+            color: #fff;
+            box-shadow: 0 4px 18px 0 rgba(167,112,239,0.22);
+        }
+        .image-gen-empty {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 60vh;
+            text-align: center;
+            color: #888;
+        }
+        .image-gen-empty-icon {
+            font-size: 6rem;
+            margin-bottom: 1.2rem;
+            color: #444;
+        }
+        .image-gen-empty-msg {
+            font-size: 1.15rem;
+            color: #888;
+        }
+        .image-gen-bottom-bar {
+            display:none;
+            position: fixed;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            padding: 2.2rem 0.5rem 2.2rem 0.5rem;
+            display: flex;
+            justify-content: center;
+            z-index: 100;
+        }
+        .image-gen-bottom-inner {
+            display: flex;
+            align-items: center;
+            background: rgba(37 , 37 , 37 ,0.8);
+            border-radius: 2.8rem;
+            backdrop-filter: blur(8px);
+            border: 1px solid #3439422d;
+            width: 100%;
+            max-width: 800px;
+            padding: 0.5rem 2rem;
+            gap: 1.2rem;
+            min-height: 72px;
+        }
+        .image-gen-menu-trigger {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+            background: none;
+            border: none;
+            outline: none;
+            padding: 0.5rem 1rem;
+            border-radius: 1.2rem;
+            transition: background 0.2s;
+            position: relative;
+        }
+        .image-gen-menu-trigger.selected, .image-gen-menu-trigger:hover {
+            background: rgba(167,112,239,0.12);
+        }
+        .image-gen-menu {
+            position: absolute;
+            left: 0;
+            top: -22rem;
+            background: #222222;
+            border-radius: 1.2rem;
+            box-shadow: 0 2px 16px 0 rgba(0,0,0,0.18);
+            border: 1.5px solid #343942;
+            min-width: 195px;
+            z-index: 200;
+            padding: 0.7rem 0;
+            display: none;
+            flex-direction: column;
+        }
+        .image-gen-menu.open {
+            display: flex;
+        }
+        .image-gen-menu-item {
+            padding: 0.8rem 1.5rem;
+            color: #9a8484;
+            font-size: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.7rem;
+            transition: background 0.2s, color 0.2s;
+        }
+        .image-gen-menu-item.selected, .image-gen-menu-item:hover {
+            background: #323232;
+        }
+        .image-gen-prompt-input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            outline: none;
+            color: #f5f5f5;
+            font-size: 1.2rem;
+            padding: 1.1rem 0.5rem 1.1rem 0;
+            position: relative;
+            left: -16rem;
+        }
+        .image-gen-generate-btn {
+            background: linear-gradient(90deg, #a770ef 0%, #f6d365 100%);
+            color: #23272f;
+            border: none;
+            border-radius: 2rem;
+            font-weight: 700;
+            font-size: 1.3rem;
+            padding: 1rem 2.3rem;
+            margin-left: 0.7rem;
+            cursor: pointer;
+            box-shadow: 0 2px 12px 0 rgba(167,112,239,0.12);
+            transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+        }
+        .image-gen-generate-btn:hover {
+            background: linear-gradient(90deg, #f6d365 0%, #a770ef 100%);
+            color: #fff;
+            box-shadow: 0 4px 18px 0 rgba(167,112,239,0.22);
+        }
+        .image-gen-icon-btn {
+            background: none;
+            border: none;
+            padding: 0.5rem;
+            border-radius: 1.2rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s;
+        }
+        .image-gen-icon-btn.selected, .image-gen-icon-btn:hover {
+            background: rgba(167,112,239,0.12);
+        }
+        .image-gen-icon-btn svg {
+            width: 1.7rem;
+            height: 1.7rem;
+            fill: #f6d365;
+        }
+        .image-gen-count-group, .image-gen-aspect-group {
+            display: flex;
+            align-items: center;
+            gap: 0.2rem;
+        }
+        .image-gen-model-switch {
+            position: relative;
+        }
+        .image-gen-model-switch-btn {
+            background: none;
+            border: none;
+            padding: 0.5rem;
+            border-radius: 1.2rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s;
+        }
+        .image-gen-model-switch-btn.selected, .image-gen-model-switch-btn:hover {
+            background: rgba(167,112,239,0.12);
+        }
+        .image-gen-model-switch-btn svg {
+            width: 2rem;
+            height: 2rem;
+            fill: #a770ef;
+        }
+        .image-gen-model-menu {
+            position: absolute;
+            left: 0;
+            top: 110%;
+            background: #23272f;
+            border-radius: 1.2rem;
+            box-shadow: 0 2px 16px 0 rgba(0,0,0,0.18);
+            border: 1.5px solid #343942;
+            min-width: 220px;
+            z-index: 200;
+            padding: 0.7rem 0;
+            display: none;
+            flex-direction: column;
+        }
+        .image-gen-model-menu.open {
+            display: flex;
+        }
+        .image-gen-model-menu-item {
+            padding: 0.8rem 1.5rem;
+            color: #f5f5f5;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: background 0.2s, color 0.2s;
+        }
+        .image-gen-model-menu-item.selected, .image-gen-model-menu-item:hover {
+            background: #a770ef;
+            color: #23272f;
+        }
+        .image-gen-model-label {
+            font-size: 1.1rem;
+            color: #f6d365;
+            margin-left: 0.5rem;
+            font-weight: 600;
+        }
+        .image-gen-spinner {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 2rem 0;
+        }
+        .image-gen-spinner i {
+            font-size: 2.2rem;
+            color: #a770ef;
+            animation: spin 1.2s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .image-gen-error {
+            color: #ff5e62;
+            background: #2a1a1a;
+            border-radius: 0.7rem;
+            padding: 0.7rem 1.2rem;
+            margin: 1.2rem 0;
+            text-align: center;
+        }
+        .image-gen-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1.5rem;
+            width: 100%;
+            margin-top: 2.5rem;
+            margin-bottom: 8rem;
+        }
+        .image-gen-card {
+            border-radius: 1.2rem;
+            box-shadow: 0 2px 12px 0 rgba(0,0,0,0.10);
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        .image-gen-card img {
+            max-width: 100%;
+            border-radius: 0.8rem;
+            margin-bottom: 0.7rem;
+            height: 20rem;
+        }
+        .image-gen-card .image-gen-caption {
+            color: #bdbdbd;
+            font-size: 0.98rem;
+            text-align: center;
+        }
+        @media (max-width: 700px) {
+            .image-gen-header {
+                padding: 1.2rem 0.7rem 0.5rem 0.7rem;
+            }
+            .image-gen-bottom-inner {
+                max-width: 100%;
+                padding: 0.2rem 0.5rem;
+            }
+        }
+        .photo-loader-shimmer {
+            display: inline-block;
+            width: 80px;
+            height: 24px;
+            margin-left: 1.2rem;
+            border-radius: 12px;
+            background: linear-gradient(90deg, #23272f 25%, #a770ef 50%, #23272f 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.2s infinite;
+        }
+        @keyframes shimmer {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+        .photo-loader { animation: pulsePhoto 1.2s infinite alternate; }
+        @keyframes pulsePhoto {
+            0% { opacity: 0.7; }
+            100% { opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <div class="image-gen-header">
+        <div class="image-gen-logo">
+            <img src="/static/img/logo.svg" alt="NumAI Logo" />
+        </div>
+        <button class="image-gen-chat-btn" onclick="window.location.href='/'"><i class="fas fa-comments"></i> Chat Page</button>
+    </div>
+    <div id="image-gen-content">
+        <div class="image-gen-empty" id="image-gen-empty">
+            <div class="image-gen-empty-icon"><i class="fas fa-folder"></i></div>
+            <div class="image-gen-empty-msg">Add images or videos from your library to organize your work</div>
+        </div>
+        <div class="image-gen-grid" id="image-gen-grid" style="display:none;"></div>
+        <div id="image-gen-feedback"></div>
+    </div>
+    <div class="image-gen-bottom-bar">
+        <div class="image-gen-bottom-inner">
+            <!-- Model menu -->
+            <div style="position:relative; margin-top: 5rem">
+                <button class="image-gen-menu-trigger" id="model-menu-trigger">
+                    <svg viewBox="0 0 24 24" width="24" height="24"><path d="M17.65 6.35A7.95 7.95 0 0 0 12 4V1l-4 4 4 4V6c3.31 0 6 2.69 6 6 0 1.3-.42 2.5-1.13 3.47l1.46 1.46A7.932 7.932 0 0 0 20 12c0-2.21-.9-4.21-2.35-5.65zM6.35 17.65A7.95 7.95 0 0 0 12 20v3l4-4-4-4v3c-3.31 0-6-2.69-6-6 0-1.3.42-2.5 1.13-3.47l-1.46-1.46A7.932 7.932 0 0 0 4 12c0 2.21.9 4.21 2.35 5.65z"></path></svg>
+                </button>
+                <div class="image-gen-menu" id="model-menu">
+                    <div class="image-gen-menu-item selected" data-model="stabilityai/stable-diffusion-xl-base-1.0"><svg viewBox="0 0 24 24" width="20" height="20"><rect x="2" y="2" width="20" height="20" rx="4" fill="#a770ef"/></svg> Stable Diffusion XL</div>
+                    <div class="image-gen-menu-item" data-model="stabilityai/stable-diffusion-2-1"><svg viewBox="0 0 24 24" width="20" height="20"><rect x="2" y="2" width="20" height="20" rx="4" fill="#f6d365"/></svg> Stable Diffusion 2.1</div>
+                    <div class="image-gen-menu-item" data-model="Lykon/DreamShaper"><svg viewBox="0 0 24 24" width="20" height="20"><circle cx="12" cy="12" r="10" fill="#f6d365"/></svg> DreamShaper</div>
+                    <div class="image-gen-menu-item" data-model="dalle-mini/dalle-mini"><svg viewBox="0 0 24 24" width="20" height="20"><rect x="4" y="4" width="16" height="16" rx="4" fill="#a770ef"/></svg> DALL·E Mini</div>
+                    <div class="image-gen-menu-item" data-model="pollinations"><svg viewBox="0 0 24 24" width="20" height="20"><circle cx="12" cy="12" r="10" fill="#ffb300"/></svg> Pollinations.ai</div>
+                    <div class="image-gen-menu-item" data-model="replicate-sdxl"><svg viewBox="0 0 24 24" width="20" height="20"><rect x="2" y="2" width="20" height="20" rx="4" fill="#00bcd4"/></svg> Replicate (SDXL)</div>
+                    <div class="image-gen-menu-item" data-model="stability-sdxl"><svg viewBox="0 0 24 24" width="20" height="20"><rect x="2" y="2" width="20" height="20" rx="4" fill="#7c3aed"/></svg> Stability API (SDXL)</div>
+                </div>
+            </div>
+            <!-- Aspect ratio menu -->
+            <div style="position:relative; margin-top: 5rem">
+                <button class="image-gen-menu-trigger" id="aspect-menu-trigger">
+                    <svg viewBox="0 0 24 24" width="24" height="24"><rect x="4" y="4" width="16" height="16" rx="3" fill="#f6d365"/></svg>
+                    <span id="aspect-menu-label">1:1</span>
+                </button>
+                <div class="image-gen-menu" id="aspect-menu">
+                    <div class="image-gen-menu-item selected" data-aspect="1:1"><svg viewBox="0 0 24 24" width="20" height="20"><rect x="4" y="4" width="16" height="16" rx="3" fill="#f6d365"/></svg> 1:1</div>
+                    <div class="image-gen-menu-item" data-aspect="2:3"><svg viewBox="0 0 24 24" width="20" height="20"><rect x="7" y="3" width="10" height="18" rx="3" fill="#a770ef"/></svg> 2:3</div>
+                    <div class="image-gen-menu-item" data-aspect="3:2"><svg viewBox="0 0 24 24" width="20" height="20"><rect x="3" y="7" width="18" height="10" rx="3" fill="#f6d365"/></svg> 3:2</div>
+                    <div class="image-gen-menu-item" data-aspect="16:9"><svg viewBox="0 0 24 24" width="20" height="20"><rect x="2" y="9" width="20" height="6" rx="2" fill="#a770ef"/></svg> 16:9</div>
+                </div>
+            </div>
+            <!-- Image count menu -->
+            <div style="position:relative; margin-top: 5rem">
+                <button class="image-gen-menu-trigger" id="count-menu-trigger">
+                    <svg viewBox="0 0 24 24" width="24" height="24"><rect x="4" y="4" width="16" height="16" rx="3" fill="#f6d365"/></svg>
+                    <span id="count-menu-label">1</span>
+                </button>
+                <div class="image-gen-menu" id="count-menu">
+                    <div class="image-gen-menu-item selected" data-count="1"><svg viewBox="0 0 24 24" width="20" height="20"><rect x="4" y="4" width="16" height="16" rx="3" fill="#f6d365"/></svg> 1</div>
+                    <div class="image-gen-menu-item" data-count="2"><svg viewBox="0 0 24 24" width="20" height="20"><rect x="2" y="4" width="9" height="16" rx="2" fill="#a770ef"/><rect x="13" y="4" width="9" height="16" rx="2" fill="#f6d365"/></svg> 2</div>
+                    <div class="image-gen-menu-item" data-count="3"><svg viewBox="0 0 24 24" width="20" height="20"><rect x="2" y="4" width="6" height="16" rx="1.5" fill="#a770ef"/><rect x="9" y="4" width="6" height="16" rx="1.5" fill="#f6d365"/><rect x="16" y="4" width="6" height="16" rx="1.5" fill="#a770ef"/></svg> 3</div>
+                    <div class="image-gen-menu-item" data-count="4"><svg viewBox="0 0 24 24" width="20" height="20"><rect x="3" y="3" width="8" height="8" rx="2" fill="#f6d365"/><rect x="13" y="3" width="8" height="8" rx="2" fill="#a770ef"/><rect x="3" y="13" width="8" height="8" rx="2" fill="#a770ef"/><rect x="13" y="13" width="8" height="8" rx="2" fill="#f6d365"/></svg> 4</div>
+                </div>
+            </div>
+            <input type="text" class="image-gen-prompt-input" placeholder="Describe your image..." id="image-gen-prompt" />
+            <button class="image-gen-generate-btn" id="image-gen-generate-btn"><i class="fas fa-magic"></i></button>
+        </div>
+    </div>
+    <script>
+        // Model menu logic
+        const modelMenuTrigger = document.getElementById('model-menu-trigger');
+        const modelMenu = document.getElementById('model-menu');
+        const modelMenuLabel = document.getElementById('model-menu-label');
+        let selectedModel = 'stabilityai/stable-diffusion-xl-base-1.0';
+        modelMenuTrigger.onclick = (e) => {
+            e.stopPropagation();
+            modelMenu.classList.toggle('open');
+            aspectMenu.classList.remove('open');
+            countMenu.classList.remove('open');
+        };
+        modelMenu.querySelectorAll('.image-gen-menu-item').forEach(item => {
+            item.onclick = () => {
+                modelMenu.querySelectorAll('.image-gen-menu-item').forEach(i => i.classList.remove('selected'));
+                item.classList.add('selected');
+                selectedModel = item.getAttribute('data-model');
+                modelMenuLabel.textContent = item.textContent.trim();
+                modelMenu.classList.remove('open');
+            };
+        });
+        // Aspect menu logic
+        const aspectMenuTrigger = document.getElementById('aspect-menu-trigger');
+        const aspectMenu = document.getElementById('aspect-menu');
+        const aspectMenuLabel = document.getElementById('aspect-menu-label');
+        let selectedAspect = '1:1';
+        aspectMenuTrigger.onclick = (e) => {
+            e.stopPropagation();
+            aspectMenu.classList.toggle('open');
+            modelMenu.classList.remove('open');
+            countMenu.classList.remove('open');
+        };
+        aspectMenu.querySelectorAll('.image-gen-menu-item').forEach(item => {
+            item.onclick = () => {
+                aspectMenu.querySelectorAll('.image-gen-menu-item').forEach(i => i.classList.remove('selected'));
+                item.classList.add('selected');
+                selectedAspect = item.getAttribute('data-aspect');
+                aspectMenuLabel.textContent = item.textContent.trim();
+                aspectMenu.classList.remove('open');
+            };
+        });
+        // Count menu logic
+        const countMenuTrigger = document.getElementById('count-menu-trigger');
+        const countMenu = document.getElementById('count-menu');
+        const countMenuLabel = document.getElementById('count-menu-label');
+        let selectedCount = 1;
+        countMenuTrigger.onclick = (e) => {
+            e.stopPropagation();
+            countMenu.classList.toggle('open');
+            modelMenu.classList.remove('open');
+            aspectMenu.classList.remove('open');
+        };
+        countMenu.querySelectorAll('.image-gen-menu-item').forEach(item => {
+            item.onclick = () => {
+                countMenu.querySelectorAll('.image-gen-menu-item').forEach(i => i.classList.remove('selected'));
+                item.classList.add('selected');
+                selectedCount = parseInt(item.getAttribute('data-count'), 10);
+                countMenuLabel.textContent = item.textContent.trim();
+                countMenu.classList.remove('open');
+            };
+        });
+        // Close menus on outside click
+        document.body.addEventListener('click', () => {
+            modelMenu.classList.remove('open');
+            aspectMenu.classList.remove('open');
+            countMenu.classList.remove('open');
+        });
+        // Generate logic
+        const genBtn = document.getElementById('image-gen-generate-btn');
+        const promptInput = document.getElementById('image-gen-prompt');
+        const grid = document.getElementById('image-gen-grid');
+        const feedback = document.getElementById('image-gen-feedback');
+        const emptyState = document.getElementById('image-gen-empty');
+        function showSpinner() {
+            // Hide empty state and show loader in the center of the content
+            if (emptyState) emptyState.style.display = 'none';
+            grid.style.display = 'none';
+            feedback.innerHTML = '';
+            let loader = document.getElementById('image-gen-center-loader');
+            if (!loader) {
+                loader = document.createElement('div');
+                loader.id = 'image-gen-center-loader';
+                loader.innerHTML = `<div class="image-gen-spinner" style="display:flex;align-items:center;justify-content:center;margin:2rem 0;">
+                    <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" class="photo-loader">
+                      <rect x="6" y="10" width="36" height="28" rx="6" fill="#23272f" stroke="#a770ef" stroke-width="2"/>
+                      <circle cx="16" cy="20" r="4" fill="#f6d365"/>
+                      <rect x="22" y="24" width="16" height="8" rx="2" fill="#a770ef"/>
+                    </svg>
+                    <span class="photo-loader-shimmer"></span>
+                </div>`;
+                loader.style.display = 'flex';
+                loader.style.justifyContent = 'center';
+                loader.style.alignItems = 'center';
+                loader.style.height = '40vh';
+            }
+            let content = document.getElementById('image-gen-content');
+            if (content && !document.getElementById('image-gen-center-loader')) {
+                content.appendChild(loader);
+            } else if (content && loader.parentNode !== content) {
+                content.appendChild(loader);
+            }
+            loader.style.display = 'flex';
+        }
+        function showError(msg) {
+            feedback.innerHTML = `<div class="image-gen-error">${msg}</div>`;
+        }
+        function clearFeedback() {
+            feedback.innerHTML = '';
+            let loader = document.getElementById('image-gen-center-loader');
+            if (loader) loader.style.display = 'none';
+        }
+        function showImages(images) {
+            grid.innerHTML = images.map(url => `
+                <div class="image-gen-card">
+                    <img src="${url}" alt="Generated Image" />
+                </div>
+            `).join('');
+            grid.style.display = '';
+            emptyState.style.display = 'none';
+        }
+        genBtn.onclick = async () => {
+            const prompt = promptInput.value.trim();
+            if (!prompt) {
+                showError('Please enter a prompt.');
+                return;
+            }
+            showSpinner();
+            grid.innerHTML = '';
+            try {
+                const res = await fetch('/api/image-gen', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ prompt, model: selectedModel, aspect: selectedAspect, count: selectedCount })
+                });
+                if (res.status === 504) {
+                    showError('Bad Gateway: The image generation model timed out. Please try again or use a different model.');
+                    return;
+                }
+                const data = await res.json();
+                clearFeedback();
+                if (data.images && data.images.length) {
+                    showImages(data.images);
+                } else if (data.raw) {
+                    showError('Image generated, but format is not directly displayable.');
+                } else if (data.error) {
+                    showError(data.error);
+                } else {
+                    showError('No image returned.');
+                }
+            } catch (e) {
+                showError('Failed to generate image.');
+            }
+        };
+        // Add shimmer effect
+        const style = document.createElement('style');
+        style.innerHTML = `
+        .photo-loader-shimmer {
+            display: inline-block;
+            width: 80px;
+            height: 24px;
+            margin-left: 1.2rem;
+            border-radius: 12px;
+            background: linear-gradient(90deg, #23272f 25%, #a770ef 50%, #23272f 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.2s infinite;
+        }
+        @keyframes shimmer {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+        .photo-loader { animation: pulsePhoto 1.2s infinite alternate; }
+        @keyframes pulsePhoto {
+            0% { opacity: 0.7; }
+            100% { opacity: 1; }
+        }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body>
+</html> 

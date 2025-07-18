@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <title>NumAI - Dive Into Unknown</title>
+    <link rel="icon" href="{{ url_for('static', filename='img/model-logos/milky-edge.svg') }}" type="image/svg+xml">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/chat-menu.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/settings.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/highlight.min.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/voice-bubble.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/voice-selection.css') }}">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css">
+    <!-- CodeMirror Themes -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/theme/monokai.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/theme/dracula.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/theme/material.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/theme/nord.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/theme/ayu-dark.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/theme/solarized.min.css">
+    <!-- CodeMirror Core -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/meta.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/javascript/javascript.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/python/python.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/xml/xml.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/css/css.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/htmlmixed/htmlmixed.min.js"></script>
+    <!-- Emmet for CodeMirror -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/emmet/2.4.6/emmet.min.js"></script>
+    <script src="https://unpkg.com/@emmetio/codemirror-plugin@1.2.0/dist/emmet-codemirror-plugin.js"></script>
+    <!-- Add CodeMirror addons to support Emmet suggestions -->
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/hint/show-hint.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/hint/show-hint.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/hint/anyword-hint.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/edit/closetag.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/edit/closebrackets.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/edit/matchtags.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/fold/xml-fold.min.js"></script>
+</head>
+
+<body>
+    <div class="container">
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <img src="{{ url_for('static', filename='img/model-logos/milky-edge.svg') }}" alt="NumAI Logo"
+                        class="logo-image">
+                    <h1 class="robotic-font">NumAI</h1>
+                </div>
+            </div>
+            <div class="sidebar-toggle-container">
+                <div class="sidebar-toggle">
+                    <img src="{{ url_for('static', filename='img/sidebar-icon.svg') }}" alt="Toggle Sidebar">
+                </div>
+            </div>
+            <div class="new-chat">
+                <img src="{{ url_for('static', filename='img/new-chat-icon.svg') }}" alt="New Chat"
+                    class="sidebar-icon">
+                <span>New Chat</span>
+            </div>
+            <div class="chat-history">
+                <!-- Chat history items will be added here -->
+                <!-- Template for chat item (hidden) -->
+                <div id="chat-item-template" style="display: none;">
+                    <div class="chat-item" data-id="">
+                        <span class="chat-title">Chat Title</span>
+                        <div class="chat-actions">
+                            <div class="chat-menu-toggle">
+                                <i class="fas fa-ellipsis-v"></i>
+                            </div>
+                            <div class="chat-menu">
+                                <div class="chat-menu-item rename-chat">
+                                    <i class="fas fa-edit"></i>
+                                    <span>Rename</span>
+                                </div>
+                                <div class="chat-menu-item delete-chat">
+                                    <i class="fas fa-trash"></i>
+                                    <span>Delete</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="user-profile">
+                <div class="user-info" style="cursor: pointer;">
+                    <img src="{{ url_for('static', filename='img/user-icon.svg') }}" alt="User" class="sidebar-icon">
+                    <span id="user-name">User</span>
+                </div>
+                <button id="logout-btn" class="logout-btn">
+                    <i class="fas fa-sign-out-alt"></i>
+                </button>
+            </div>
+        </div>
+
+        <div class="chat-section">
+            <div class="mobile-toggle">
+                <img src="{{ url_for('static', filename='img/sidebar-icon.svg') }}" alt="">
+            </div>
+            <div class="messages-container">
+                <div class="messages" id="messages">
+                    <div class="message system">
+                        <div class="message-content">
+                            <p>Hello! I'm NumAI. How can I help you today?</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="input-container">
+                <div class="user-input-wrapper modern">
+                    <div class="input-cont">
+                        <div id="img-cont" class="img-cont">
+                            <!-- Here goes uploaded images by user -->
+                            <div id="image-preview-container" class="image-preview-container" style="display: none;">
+                                <img id="image-preview" src="" alt="Preview" class="image-preview">
+                                <button id="remove-image-btn" class="remove-image-btn" title="Remove image">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="text-area">
+                            <textarea id="user-input" placeholder="Ask me anything..." rows="1"></textarea>
+                        </div>
+                        <div class="multi-option">
+                            <!-- Here goes model switcher button & image uploading button -->
+                            <div class="imag-model">
+                                <button id="image-upload-btn" class="action-btn image-upload-btn"
+                                    data-tooltip="Upload Image (Comming Soon)">
+                                    <i class="fas fa-image"></i>
+                                </button>
+                                <input type="file" id="image-upload" accept="image/*" style="display: none;">
+                                <button id="thinking-toggle-btn" class="action-btn thinking-toggle-btn"
+                                    data-tooltip="Deep Thinking (Comming Soon)">
+                                    <i class="fas fa-brain"></i>
+                                </button>
+                                <button id="model-switch-btn" class="action-btn model-switch-btn"
+                                    data-tooltip="Switch AI Model">
+                                    <div id="current-model-icon" class="current-model-icon">
+                                        <!-- The current model icon will be inserted here by JavaScript -->
+                                    </div>
+                                </button>
+                            </div>
+                            <button class="action-btn stop-btn" style="display: none;" data-tooltip="Stop Generation">
+                                <i class="fas fa-stop"></i>
+                            </button>
+                            <button class="action-btn send-btn" data-tooltip="Send Message">
+                                <img src="{{ url_for('static', filename='img/arrow-icon.svg') }}" alt="Send"
+                                    class="send-icon">
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Model Switcher Popup -->
+                <div id="model-switcher-popup" class="model-switcher-popup" style="display: none;">
+                    <div class="model-switcher-header">
+                        <h3>Choose Model</h3>
+                        <button id="close-model-switcher" class="close-model-switcher">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <div id="model-options-container" class="model-options-container">
+                        <!-- Ultra Fast Models (Groq and Cohere) -->
+                        <div class="model-category">
+                            <h4 class="model-category-title">Ultra Fast models</h4>
+                            <div class="model-option" data-model-id="groq/llama3-8b">
+                                <div class="model-option-icon"><!-- Logo will be inserted by JavaScript --></div>
+                                <div class="model-option-info">
+                                    <div class="model-option-name">Milky 8B</div>
+                                    <div class="model-option-description">Ultra-fast Milky 8B model</div>
+                                </div>
+                            </div>
+                            <div class="model-option" data-model-id="groq/llama3-70b">
+                                <div class="model-option-icon"><!-- Logo will be inserted by JavaScript --></div>
+                                <div class="model-option-info">
+                                    <div class="model-option-name">Milky 70B</div>
+                                    <div class="model-option-description">Ultra-fast Milky 70B model</div>
+                                </div>
+                            </div>
+                            <div class="model-option" data-model-id="cohere/command-r-plus">
+                                <div class="model-option-icon"><!-- Logo will be inserted by JavaScript --></div>
+                                <div class="model-option-info">
+                                    <div class="model-option-name">Milky S2</div>
+                                    <div class="model-option-description">Ultra-fast Command-R+ model (Cohere)</div>
+                                </div>
+                            </div>
+                            <div class="model-option" data-model-id="cohere/command-r">
+                                <div class="model-option-icon"><!-- Logo will be inserted by JavaScript --></div>
+                                <div class="model-option-info">
+                                    <div class="model-option-name">Milky 2o</div>
+                                    <div class="model-option-description">Ultra-fast Command-R model (Cohere)</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- General Models -->
+                        <div class="model-category">
+                            <h4 class="model-category-title">Text Based Models</h4>
+                            <div class="model-option" data-model-id="deepseek/deepseek-chat-v3-0324:free">
+                                <div class="model-option-icon"><!-- Logo will be inserted by JavaScript --></div>
+                                <div class="model-option-info">
+                                    <div class="model-option-name">Milky 3.1</div>
+                                    <div class="model-option-description">Advanced reasoning and coding capabilities
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="model-option" data-model-id="mistralai/mistral-small-3.2-24b-instruct:free">
+                                <div class="model-option-icon"><!-- Logo will be inserted by JavaScript --></div>
+                                <div class="model-option-info">
+                                    <div class="model-option-name">Milky Small</div>
+                                    <div class="model-option-description">Fast and efficient model with strong reasoning
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="model-option" data-model-id="mistralai/devstral-small:free">
+                                <div class="model-option-icon"><!-- Logo will be inserted by JavaScript --></div>
+                                <div class="model-option-info">
+                                    <div class="model-option-name">Milky 3.7</div>
+                                    <div class="model-option-description">Specialized for coding and technical tasks
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="model-option" data-model-id="google/gemma-3n-e4b-it:free">
+                                <div class="model-option-icon"><!-- Logo will be inserted by JavaScript --></div>
+                                <div class="model-option-info">
+                                    <div class="model-option-name">Milky V2</div>
+                                    <div class="model-option-description">Google's efficient model with strong reasoning
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Coders Models -->
+                        <div class="model-category">
+                            <h4 class="model-category-title">Coders</h4>
+                            <div class="model-option" data-model-id="agentica-org/deepcoder-14b-preview:free">
+                                <div class="model-option-icon"><!-- Logo will be inserted by JavaScript --></div>
+                                <div class="model-option-info">
+                                    <div class="model-option-name">MilkyCoder Pro</div>
+                                    <div class="model-option-description">Specialized for complex programming tasks
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="model-option" data-model-id="deepseek/deepseek-v3-base:free">
+                                <div class="model-option-icon"><!-- Logo will be inserted by JavaScript --></div>
+                                <div class="model-option-info">
+                                    <div class="model-option-name">Milky 3.7 sonnet</div>
+                                    <div class="model-option-description">Optimized for software development</div>
+                                </div>
+                            </div>
+                            <div class="model-option" data-model-id="deepseek/deepseek-chat-v3-0324:free">
+                                <div class="model-option-icon"><!-- Logo will be inserted by JavaScript --></div>
+                                <div class="model-option-info">
+                                    <div class="model-option-name">Sonnet Seek</div>
+                                    <div class="model-option-description">Balanced coding and conversation abilities
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="model-option" data-model-id="mistralai/mistral-7b-instruct:free">
+                                <div class="model-option-icon"><!-- Logo will be inserted by JavaScript --></div>
+                                <div class="model-option-info">
+                                    <div class="model-option-name">Milky Fast</div>
+                                    <div class="model-option-description">Fast and efficient code generation</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    </div>
+    <!-- Canvas Editor Overlay Container -->
+    <div id="canvas-editor-container" style="display:none;"></div>
+
+    <!-- Terminal Container is now moved inside canvas-editor-container via JavaScript -->
+
+
+    <!-- Settings Container -->
+    <!-- Settings Container HTML -->
+    <div id="settings-container" class="settings-container">
+        <div class="settings-header">
+            <h2>Settings</h2>
+            <button id="close-settings" class="close-settings">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+
+        <div class="settings-tabs">
+            <div class="tab active" data-tab="general">General</div>
+            <div class="tab" data-tab="profile">Profile</div>
+            <div class="tab" data-tab="advanced">Advanced</div>
+            <div class="tab" data-tab="about">About</div>
+        </div>
+
+        <div class="settings-content">
+            <!-- General Settings Tab -->
+            <div class="tab-content active" id="general-tab">
+                <div class="settings-section">
+                    <h3>Theme</h3>
+                    <div class="theme-selector">
+                        <div class="theme-option" data-theme="dark">
+                            <div class="theme-preview dark"></div>
+                            <span>Dark</span>
+                        </div>
+                        <div class="theme-option" data-theme="light">
+                            <div class="theme-preview light"></div>
+                            <span>Light</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="settings-section">
+                    <h3>Language</h3>
+                    <select id="language-selector" class="language-selector">
+                        <option value="en">English</option>
+                        <option value="es">Español</option>
+                        <option value="fr">Français</option>
+                        <option value="de">Deutsch</option>
+                        <option value="zh">中文</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Profile Settings Tab -->
+            <div class="tab-content" id="profile-tab">
+                <div class="settings-section">
+                    <h3>Account Information</h3>
+                    <div class="profile-info">
+                        <div class="profile-field">
+                            <label>Name</label>
+                            <div id="profile-name" class="profile-value">Loading...</div>
+                        </div>
+                        <div class="profile-field">
+                            <label>Email</label>
+                            <div id="profile-email" class="profile-value">Loading...</div>
+                        </div>
+                        <div class="profile-field">
+                            <label>Account Type</label>
+                            <div id="profile-type" class="profile-value">Standard</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="settings-section">
+                    <h3>Data Management</h3>
+                    <button id="export-chats" class="settings-button">
+                        <i class="fas fa-download"></i> Export Chats
+                    </button>
+                    <button id="delete-all-chats" class="settings-button danger">
+                        <i class="fas fa-trash"></i> Delete All Chats
+                    </button>
+                    <button id="delete-account" class="settings-button danger">
+                        <i class="fas fa-user-slash"></i> Delete Account
+                    </button>
+                </div>
+            </div>
+
+            <!-- Advanced Settings Tab -->
+            <div class="tab-content" id="advanced-tab">
+                <div class="settings-section">
+                    <h3><span>Voice</span></h3>
+                    <button id="select-voice-btn" class="settings-button">Select Voice</button>
+                </div>
+                <div class="settings-section">
+                    <h3><span>Read Aloud</span></h3>
+                    <div class="toggle-container">
+                        <label for="auto-speak-toggle">Speak response automatically</label>
+                        <div class="toggle-switch">
+                            <input type="checkbox" id="auto-speak-toggle">
+                            <span class="toggle-slider"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- About Tab -->
+            <div class="tab-content" id="about-tab">
+                <div class="settings-section">
+                    <h3>About NumAI</h3>
+                    <p>NumAI, providing intelligent conversational AI capabilities.</p>
+                    <p>Current Model: <span id="current-model-display">Loading...</span></p>
+                </div>
+
+                <div class="settings-section">
+                    <h3>Credits</h3>
+                    <p>Developed by NumAI Team</p>
+                    <p>© 2026 NumAI. All rights reserved.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Voice Selection Modal -->
+    <div id="voice-selection-modal" class="voice-selection-modal">
+        <div class="voice-modal-content">
+            <button id="close-voice-modal" class="close-modal-btn">&times;</button>
+
+
+            <!-- Voice Bubble Container -->
+            <div class="voice-bubble-container">
+                <div class="voice-bubble" id="voiceBubble">
+                    <div class="smoke-container" id="smokeContainer">
+                        <!-- Dynamic smoke particles will be generated here -->
+                    </div>
+
+                    <div class="additional-smoke">
+                        <div class="smoke-layer"></div>
+                        <div class="smoke-layer"></div>
+                        <div class="smoke-layer"></div>
+                        <div class="smoke-layer"></div>
+                        <div class="smoke-layer"></div>
+                    </div>
+                    
+                    <div class="bubble-content"> 
+                        <!-- Audio analyzer visualization will be handled by JS -->
+                    </div> 
+                </div>
+                <!-- Voice name moved outside the bubble -->
+                <div id="current-voice-name" class="voice-name-display"></div>
+            </div>
+
+
+            <!-- Voice Selection Dropdown -->
+            <div class="voice-dropdown-container">
+                <div class="voice-new-css">
+                    <select id="voice-modal-select" class="voice-select">
+                            <option value="en-US-AndrewMultilingualNeural">Andrew</option>
+                            <option value="en-US-RogerNeural">Roger</option>
+                            <option value="en-US-SteffanNeural">Jug</option>
+                            <option value="en-US-AvaNeural">Freddy</option>
+                            <option value="en-US-MichelleNeural">Fulfy</option> 
+                            <option value="en-US-AvaMultilingualNeural">Lua</option>
+                            <option value="en-US-JennyNeural">Jenny</option>
+                            <option value="en-US-SaraNeural">Sara</option>
+                    </select>
+                </div>
+                <div class="done-new-c">
+                    <button id="done-voice-btn" class="settings-button">
+                        <i class="fas fa-check"></i> Done
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/emojis.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/auth.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/firebase-chat.js') }}"></script>
+    <script src="/static/js/marked.min.js"></script>
+    <script src="{{ url_for('static', filename='js/highlight-all.min.js') }}"></script>
+    <script src="/static/js/main.js"></script>
+    <script src="{{ url_for('static', filename='js/settings.js') }}"></script>
+
+    <script>
+        // Logout functionality
+        document.getElementById('logout-btn').addEventListener('click', () => {
+            firebase.auth().signOut().then(() => {
+                window.location.href = '/login';
+            }).catch((error) => {
+                console.error('Logout error:', error);
+            });
+        });
+
+        // Update user name from Firebase
+        firebase.auth().onAuthStateChanged(user => {
+            if (user) {
+                const userNameElement = document.getElementById('user-name');
+                if (userNameElement) {
+                    userNameElement.textContent = user.displayName || user.email || 'User';
+                }
+            }
+        });
+    </script>
+</body>
+
+</html>
