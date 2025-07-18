@@ -47,11 +47,7 @@ body {
     --send-text: black;
     --canvas-header: #2f2f2f;
     --canvas-codemirror: #212121;
-<<<<<<< HEAD
     --inline-code:black;
-=======
-
->>>>>>> a5da6eb90ea3d1119c2328a05bdfdb6bb3f1e189
 }
 
 body.light-mode {
@@ -78,10 +74,7 @@ body.light-mode {
     --send-text: white;
     --canvas-header: #dddddd;
     --canvas-codemirror: #d7d7d7;
-<<<<<<< HEAD
     --inline-code: none;
-=======
->>>>>>> a5da6eb90ea3d1119c2328a05bdfdb6bb3f1e189
 }
 
 .container {
@@ -1200,11 +1193,7 @@ h3.content-title {
     display: flex;
     align-items: center;
     position: relative;
-<<<<<<< HEAD
     left: -30rem;
-=======
-    left: -32rem;
->>>>>>> a5da6eb90ea3d1119c2328a05bdfdb6bb3f1e189
 }
 /* Model Switcher Popup */
 .model-switcher-popup {
@@ -2290,11 +2279,7 @@ tr {
   font-style: italic;
 }
 .message-content code {
-<<<<<<< HEAD
   background: var(--inline-code);
-=======
-  background: var(--code-bg);
->>>>>>> a5da6eb90ea3d1119c2328a05bdfdb6bb3f1e189
   padding: 2px 6px;
   border-radius: 4px;
   font-size: 12px;
