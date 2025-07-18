@@ -2,25 +2,14 @@
   "version": 2,
   "builds": [
     {
-<<<<<<< HEAD
       "src": "api/index.py",
-=======
-      "src": "api/app.py",
->>>>>>> a5da6eb90ea3d1119c2328a05bdfdb6bb3f1e189
       "use": "@vercel/python"
     }
   ],
   "routes": [
     {
       "src": "/(.*)",
-<<<<<<< HEAD
       "dest": "/api/index.py"
     }
   ]
 }
-=======
-      "dest": "/api/app.py"
-    }
-  ]
-}
->>>>>>> a5da6eb90ea3d1119c2328a05bdfdb6bb3f1e189

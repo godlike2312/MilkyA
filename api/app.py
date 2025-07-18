@@ -1,8 +1,4 @@
-<<<<<<< HEAD
 from flask import Flask, send_from_directory, render_template, request, jsonify, redirect, url_for, session, send_file
-=======
-from flask import Flask, send_from_directory, render_template, request, jsonify, redirect, url_for, session
->>>>>>> a5da6eb90ea3d1119c2328a05bdfdb6bb3f1e189
 import requests
 import json
 import os
@@ -12,14 +8,9 @@ import traceback
 import firebase_admin
 from firebase_admin import credentials, auth
 import base64
-<<<<<<< HEAD
 import io
 import asyncio
 import edge_tts
-=======
-from routes.tts import tts_bp
-from datetime import datetime, timedelta
->>>>>>> a5da6eb90ea3d1119c2328a05bdfdb6bb3f1e189
 
 # Initialize Firebase Admin SDK before creating the Flask app
 # This ensures Firebase is initialized exactly once and before any routes are defined
@@ -80,23 +71,11 @@ def initialize_firebase():
                 continue
         
         # If we get here, try application default credentials
-<<<<<<< HEAD
         print("Attempting to initialize Firebase with application default credentials")
         firebase_admin.initialize_app()
         firebase_initialized = True
         print("Successfully initialized Firebase with application default credentials")
         return True
-=======
-        try:
-            print("Attempting to initialize Firebase with application default credentials")
-            firebase_admin.initialize_app()
-            firebase_initialized = True
-            print("Successfully initialized Firebase with application default credentials")
-            return True
-        except Exception as adc_error:
-            print(f"Error initializing Firebase with application default credentials: {str(adc_error)}")
-            # Don't set firebase_initialized to True if it failed
->>>>>>> a5da6eb90ea3d1119c2328a05bdfdb6bb3f1e189
     except ValueError as ve:
         if "already exists" in str(ve):
             print("Firebase app already initialized")
@@ -117,12 +96,6 @@ print(f"Firebase initialization {'successful' if firebase_init_success else 'FAI
 app = Flask(__name__, static_folder='./static', template_folder='./templates')  # Updated paths for Vercel with symbolic links
 app.secret_key = secrets.token_hex(16)  # Generate a secure secret key for sessions
 
-<<<<<<< HEAD
-=======
-# Register blueprints
-app.register_blueprint(tts_bp)
-
->>>>>>> a5da6eb90ea3d1119c2328a05bdfdb6bb3f1e189
 # OpenRouter API key - read from environment variable
 API_KEY = os.environ.get('OPENROUTER_API_KEY', '')
 
@@ -310,23 +283,7 @@ def make_openrouter_request(url, headers, data=None, method="POST", max_retries=
 
 # Helper function to verify Firebase ID token
 def verify_firebase_token(request_obj):
-<<<<<<< HEAD
     """Verify Firebase ID token from Authorization header"""
-=======
-    """Verify Firebase ID token from Authorization header or session"""
-    # First check if we have a valid token in the session
-    if 'firebase_token' in session and 'token_expiry' in session:
-        # Check if the token is still valid (not expired)
-        if datetime.now() < datetime.fromisoformat(session['token_expiry']):
-            print("Using cached Firebase token from session")
-            return session['firebase_token']
-        else:
-            print("Cached token has expired, will verify again")
-            # Remove expired token from session
-            session.pop('firebase_token', None)
-            session.pop('token_expiry', None)
-    
->>>>>>> a5da6eb90ea3d1119c2328a05bdfdb6bb3f1e189
     # Get the Authorization header
     auth_header = request_obj.headers.get('Authorization')
     if not auth_header or not auth_header.startswith('Bearer '):
@@ -356,17 +313,6 @@ def verify_firebase_token(request_obj):
         print("Attempting to verify Firebase token...")
         decoded_token = auth.verify_id_token(token)
         print(f"Token verified successfully for user: {decoded_token.get('uid')}")
-<<<<<<< HEAD
-=======
-        
-        # Store the verified token in session with an expiry time (1 hour)
-        session['firebase_token'] = decoded_token
-        # Set expiry time to 1 hour from now
-        expiry_time = datetime.now() + timedelta(hours=1)
-        session['token_expiry'] = expiry_time.isoformat()
-        print(f"Token cached in session until {expiry_time}")
-        
->>>>>>> a5da6eb90ea3d1119c2328a05bdfdb6bb3f1e189
         return decoded_token
     except ValueError as ve:
         print(f"ValueError verifying token: {str(ve)}")
@@ -377,16 +323,6 @@ def verify_firebase_token(request_obj):
                     # Try again after re-initialization
                     decoded_token = auth.verify_id_token(token)
                     print(f"Token verified successfully after re-initialization for user: {decoded_token.get('uid')}")
-<<<<<<< HEAD
-=======
-                    
-                    # Store the verified token in session with an expiry time
-                    session['firebase_token'] = decoded_token
-                    expiry_time = datetime.now() + timedelta(hours=1)
-                    session['token_expiry'] = expiry_time.isoformat()
-                    print(f"Token cached in session until {expiry_time}")
-                    
->>>>>>> a5da6eb90ea3d1119c2328a05bdfdb6bb3f1e189
                     return decoded_token
                 except Exception as retry_error:
                     print(f"Failed to verify token after re-initialization: {str(retry_error)}")
@@ -437,52 +373,6 @@ def status():
 def index():
     return render_template('index.html')
 
-<<<<<<< HEAD
-=======
-# New route for initial token verification - now bypasses actual verification until chat starts
-@app.route('/api/verify-token', methods=['POST'])
-def verify_token():
-    try:
-        # Log request headers for debugging (excluding sensitive information)
-        safe_headers = dict(request.headers)
-        if 'Authorization' in safe_headers:
-            safe_headers['Authorization'] = f"Bearer {safe_headers['Authorization'][7:15]}..." # Show only beginning of token
-        print(f"Initial token verification - Request headers: {safe_headers}")
-        
-        # For development mode, bypass token verification if needed
-        if app.debug and os.environ.get('BYPASS_AUTH', 'false').lower() == 'true':
-            print("WARNING: Running in development mode with BYPASS_AUTH=true. Skipping token verification.")
-            # Create a mock decoded token with a test user ID
-            decoded_token = {"uid": "test-user-id"}
-            # Store the test token in session
-            session['firebase_token'] = decoded_token
-            expiry_time = datetime.now() + timedelta(hours=1)
-            session['token_expiry'] = expiry_time.isoformat()
-            print(f"Development mode - Using test user ID: {decoded_token['uid']}")
-            return jsonify({'success': True, 'user_id': decoded_token['uid'], 'dev_mode': True})
-        
-        # Skip actual token verification on page load - we'll verify when user starts chat
-        print("Initial page load - Skipping token verification until chat starts")
-        
-        # For development/testing purposes only
-        if app.debug:
-            print("WARNING: Running in debug mode. Using test user ID.")
-            decoded_token = {"uid": "test-user-id"}
-            # Store the test token in session
-            session['firebase_token'] = decoded_token
-            expiry_time = datetime.now() + timedelta(hours=1)
-            session['token_expiry'] = expiry_time.isoformat()
-            return jsonify({'success': True, 'user_id': decoded_token['uid'], 'dev_mode': True})
-        
-        # In production, we'll just return success without actual verification
-        # The actual verification will happen when the user starts a chat
-        return jsonify({'success': True})
-    except Exception as e:
-        print(f"Initial token verification - Error: {str(e)}")
-        traceback.print_exc()
-        return jsonify({'error': str(e)}), 500
-
->>>>>>> a5da6eb90ea3d1119c2328a05bdfdb6bb3f1e189
 @app.route('/api/chat', methods=['POST'])
 def chat():
     try:
@@ -492,7 +382,6 @@ def chat():
             safe_headers['Authorization'] = f"Bearer {safe_headers['Authorization'][7:15]}..." # Show only beginning of token
         print(f"Request headers: {safe_headers}")
         
-<<<<<<< HEAD
         # Verify Firebase token
         print("Attempting to verify Firebase token...")
         decoded_token = verify_firebase_token(request)
@@ -502,36 +391,6 @@ def chat():
         print("Bypassing authentication for testing.")
         decoded_token = {"uid": "test-user-id"}
         # TODO: Remove this bypass in production once authentication is working properly
-=======
-        # For development mode, bypass token verification if needed
-        if app.debug and os.environ.get('BYPASS_AUTH', 'false').lower() == 'true':
-            print("WARNING: Running in development mode with BYPASS_AUTH=true. Skipping token verification.")
-            # Create a mock decoded token with a test user ID
-            decoded_token = {"uid": "test-user-id"}
-            print(f"Development mode - Using test user ID: {decoded_token['uid']}")
-        else:
-            # Use session-based token verification
-            decoded_token = None
-            
-            # First check if we have a valid token in the session
-            if 'firebase_token' in session and 'token_expiry' in session:
-                if datetime.now() < datetime.fromisoformat(session['token_expiry']):
-                    print("Using cached Firebase token from session")
-                    decoded_token = session['firebase_token']
-                else:
-                    # If token expired, verify again
-                    print("Cached token has expired, verifying again")
-                    decoded_token = verify_firebase_token(request)
-            else:
-                # No token in session, verify from request
-                print("No token in session, verifying from request")
-                decoded_token = verify_firebase_token(request)
-            
-            # Only bypass authentication in debug mode if verification failed
-            if app.debug and not decoded_token:
-                print("WARNING: Running in debug mode. Bypassing token verification.")
-                decoded_token = {"uid": "test-user-id"}
->>>>>>> a5da6eb90ea3d1119c2328a05bdfdb6bb3f1e189
         
         if not decoded_token:
             print("Authentication failed: No valid token provided")
@@ -611,11 +470,7 @@ def chat():
                     messages = [
                         {
                             "role": "system",
-<<<<<<< HEAD
                             "content": "You are NumAI, a helpful assistant . When a user says only 'hello', respond with just 'Hello! How can I help you today?' and nothing more. when user says 'What is NumAI', repond with this information 'NumAI is Service That provides AI Model use For free' when user says 'how many models you or NumAI have', respond 'there is a catogory 1. Ultra fast model , 2. Text Based models , 3. Coders , In Ultra fast catagory 1. Milky 8B , 2.Milky 70B , 3.Milky S2, 4. Milky 2o, In Text Based Catagory 1. Milky 3.1 , 2. Milky Small, 3. Milky 3.7, 4. Milky V2, in Coders Catagory 1. MilkyCoder Pro, 2. Milky 3.7 Sonnet, 3. Sonnet Seek, 4. Milky Fast' For all other queries, respond normally with appropriate markdown formatting: **bold text** for titles, backticks for code, and proper code blocks with language specification. You can use emoji shortcodes like :smile:, :thinking:, :idea:, :code:, :warning:, :check:, :star:, :heart:, :info:, and :rocket: in your responses. When providing code examples, make it clear these are standalone examples."
-=======
-                            "content": "You are NumAI, a helpful assistant . When a user says only 'hello', respond with just 'Hello! How can I help you today?' and nothing more. For all other queries, respond normally with appropriate markdown formatting: **bold text** for titles, backticks for code, and proper code blocks with language specification. You can use emoji shortcodes like :smile:, :thinking:, :idea:, :code:, :warning:, :check:, :star:, :heart:, :info:, and :rocket: in your responses. When providing code examples, make it clear these are standalone examples."
->>>>>>> a5da6eb90ea3d1119c2328a05bdfdb6bb3f1e189
                         },
                         {
                             "role": "user",
@@ -1473,7 +1328,6 @@ def image_gen_api():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-<<<<<<< HEAD
 @app.route('/api/edge-tts', methods=['POST'])
 def edge_tts_api():
     data = request.json
@@ -1562,8 +1416,6 @@ def edge_tts_api():
         print(f'Edge TTS error: {str(e)}')
         return jsonify({'error': str(e)}), 500
 
-=======
->>>>>>> a5da6eb90ea3d1119c2328a05bdfdb6bb3f1e189
 # Set environment variables for Vercel deployment
 if os.environ.get('VERCEL_ENV'):
     print(f"Running in Vercel environment: {os.environ.get('VERCEL_ENV')}")

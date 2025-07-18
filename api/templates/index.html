@@ -13,11 +13,8 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/chat-menu.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/settings.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/highlight.min.css') }}">
-<<<<<<< HEAD
     <link rel="stylesheet" href="{{ url_for('static', filename='css/voice-bubble.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/voice-selection.css') }}">
-=======
->>>>>>> a5da6eb90ea3d1119c2328a05bdfdb6bb3f1e189
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
@@ -155,10 +152,6 @@
                                         <!-- The current model icon will be inserted here by JavaScript -->
                                     </div>
                                 </button>
-<<<<<<< HEAD
-=======
-                                <!-- Voice selection button moved to settings -->
->>>>>>> a5da6eb90ea3d1119c2328a05bdfdb6bb3f1e189
                             </div>
                             <button class="action-btn stop-btn" style="display: none;" data-tooltip="Stop Generation">
                                 <i class="fas fa-stop"></i>
@@ -297,10 +290,7 @@
 
 
     <!-- Settings Container -->
-<<<<<<< HEAD
     <!-- Settings Container HTML -->
-=======
->>>>>>> a5da6eb90ea3d1119c2328a05bdfdb6bb3f1e189
     <div id="settings-container" class="settings-container">
         <div class="settings-header">
             <h2>Settings</h2>
@@ -322,11 +312,7 @@
                 <div class="settings-section">
                     <h3>Theme</h3>
                     <div class="theme-selector">
-<<<<<<< HEAD
                         <div class="theme-option" data-theme="dark">
-=======
-                        <div class="theme-option active" data-theme="dark">
->>>>>>> a5da6eb90ea3d1119c2328a05bdfdb6bb3f1e189
                             <div class="theme-preview dark"></div>
                             <span>Dark</span>
                         </div>
@@ -347,7 +333,6 @@
                         <option value="zh">中文</option>
                     </select>
                 </div>
-<<<<<<< HEAD
             </div>
 
             <!-- Profile Settings Tab -->
@@ -418,101 +403,13 @@
             </div>
         </div>
     </div>
-=======
-
-                <div class="settings-section">
-                    <h3>Voice Settings</h3>
-                    <p>Voice options have been moved to the Advanced tab. Click on the Advanced tab to select your
-                        preferred voice.</p>
-                </div>
-            </div>
-        </div>
-
-        <!-- Profile Settings Tab -->
-        <div class="tab-content" id="profile-tab">
-            <div class="settings-section">
-                <h3>Account Information</h3>
-                <div class="profile-info">
-                    <div class="profile-field">
-                        <label>Name</label>
-                        <div id="profile-name" class="profile-value">Loading...</div>
-                    </div>
-                    <div class="profile-field">
-                        <label>Email</label>
-                        <div id="profile-email" class="profile-value">Loading...</div>
-                    </div>
-                    <div class="profile-field">
-                        <label>Account Type</label>
-                        <div id="profile-type" class="profile-value">Standard</div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="settings-section">
-                <h3>Data Management</h3>
-                <button id="export-chats" class="settings-button">
-                    <i class="fas fa-download"></i> Export Chats
-                </button>
-                <button id="delete-all-chats" class="settings-button danger">
-                    <i class="fas fa-trash"></i> Delete All Chats
-                </button>
-                <button id="delete-account" class="settings-button danger">
-                    <i class="fas fa-user-slash"></i> Delete Account
-                </button>
-            </div>
-        </div>
-
-        <!-- Advanced Tab -->
-        <div class="tab-content" id="advanced-tab">
-            <div class="settings-section">
-                <h3>Voice</h3>
-                <div class="settings-buttons">
-                    <button id="select-voice-btn" class="settings-button">
-                        <i class="fas fa-microphone"></i> Select Voice
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <!-- About Tab -->
-        <div class="tab-content" id="about-tab">
-            <div class="settings-section">
-                <h3>About NumAI</h3>
-                <p>NumAI, providing intelligent conversational AI capabilities.</p>
-                <p>Model: Milky 2.4</p>
-            </div>
-
-            <div class="settings-section">
-                <h3>Credits</h3>
-                <p>Developed by NumAI Team</p>
-                <p>© 2025 NumAI. All rights reserved.</p>
-            </div>
-        </div>
-    </div>
-    </div>
-
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/voice-selection.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/voice-bubble.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/model-switcher.css') }}">
-    <script src="{{ url_for('static', filename='js/emojis.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/auth.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/firebase-chat.js') }}"></script>
-    <script src="/static/js/marked.min.js"></script>
-    <script src="{{ url_for('static', filename='js/highlight.min.js') }}"></script>
-    <script src="/static/js/main.js"></script>
-    <script src="{{ url_for('static', filename='js/settings.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/voice-selection.js') }}"></script>
->>>>>>> a5da6eb90ea3d1119c2328a05bdfdb6bb3f1e189
 
     <!-- Voice Selection Modal -->
     <div id="voice-selection-modal" class="voice-selection-modal">
         <div class="voice-modal-content">
             <button id="close-voice-modal" class="close-modal-btn">&times;</button>
 
-<<<<<<< HEAD
 
-=======
->>>>>>> a5da6eb90ea3d1119c2328a05bdfdb6bb3f1e189
             <!-- Voice Bubble Container -->
             <div class="voice-bubble-container">
                 <div class="voice-bubble" id="voiceBubble">
@@ -527,7 +424,6 @@
                         <div class="smoke-layer"></div>
                         <div class="smoke-layer"></div>
                     </div>
-<<<<<<< HEAD
                     
                     <div class="bubble-content"> 
                         <!-- Audio analyzer visualization will be handled by JS -->
@@ -537,20 +433,11 @@
                 <div id="current-voice-name" class="voice-name-display"></div>
             </div>
 
-=======
-
-                    <div class="bubble-content">
-                        <div id="current-voice-name"></div>
-                    </div>
-                </div>
-            </div>
->>>>>>> a5da6eb90ea3d1119c2328a05bdfdb6bb3f1e189
 
             <!-- Voice Selection Dropdown -->
             <div class="voice-dropdown-container">
                 <div class="voice-new-css">
                     <select id="voice-modal-select" class="voice-select">
-<<<<<<< HEAD
                             <option value="en-US-AndrewMultilingualNeural">Andrew</option>
                             <option value="en-US-RogerNeural">Roger</option>
                             <option value="en-US-SteffanNeural">Jug</option>
@@ -559,24 +446,6 @@
                             <option value="en-US-AvaMultilingualNeural">Lua</option>
                             <option value="en-US-JennyNeural">Jenny</option>
                             <option value="en-US-SaraNeural">Sara</option>
-=======
-                        <optgroup label="Male Voices">
-                            <option value="male-1">William</option>
-                            <option value="male-2">Ryan</option>
-                            <option value="male-3">Mitchell</option>
-                            <option value="male-4">Guy</option>
-                            <option value="male-5">Liam</option>
-                            <option value="male-6">Prabhat</option>
-                        </optgroup>
-                        <optgroup label="Female Voices">
-                            <option value="female-1">Natasha</option>
-                            <option value="female-2">Sonia</option>
-                            <option value="female-3">Ava</option>
-                            <option value="female-4">Jenny</option>
-                            <option value="female-5">Clara</option>
-                            <option value="female-6">Neerja</option>
-                        </optgroup>
->>>>>>> a5da6eb90ea3d1119c2328a05bdfdb6bb3f1e189
                     </select>
                 </div>
                 <div class="done-new-c">
@@ -588,7 +457,6 @@
         </div>
     </div>
 
-<<<<<<< HEAD
     <script src="{{ url_for('static', filename='js/emojis.js') }}"></script>
     <script src="{{ url_for('static', filename='js/auth.js') }}"></script>
     <script src="{{ url_for('static', filename='js/firebase-chat.js') }}"></script>
@@ -597,8 +465,6 @@
     <script src="/static/js/main.js"></script>
     <script src="{{ url_for('static', filename='js/settings.js') }}"></script>
 
-=======
->>>>>>> a5da6eb90ea3d1119c2328a05bdfdb6bb3f1e189
     <script>
         // Logout functionality
         document.getElementById('logout-btn').addEventListener('click', () => {
@@ -609,38 +475,16 @@
             });
         });
 
-<<<<<<< HEAD
         // Update user name from Firebase
-=======
-        // Update user name from Firebase and verify token once
->>>>>>> a5da6eb90ea3d1119c2328a05bdfdb6bb3f1e189
         firebase.auth().onAuthStateChanged(user => {
             if (user) {
                 const userNameElement = document.getElementById('user-name');
                 if (userNameElement) {
                     userNameElement.textContent = user.displayName || user.email || 'User';
                 }
-<<<<<<< HEAD
             }
         });
     </script>
-=======
-
-                // Verify token once when user is authenticated
-                if (typeof verifyTokenOnce === 'function') {
-                    verifyTokenOnce().then(() => {
-                        console.log('Initial token verification complete');
-                    }).catch(error => {
-                        console.error('Error during initial token verification:', error);
-                    });
-                }
-            }
-        });
-    </script>
-    <!-- Microphone button functionality -->
-    <script src="{{ url_for('static', filename='js/mic-button.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/canvas.js') }}"></script>
->>>>>>> a5da6eb90ea3d1119c2328a05bdfdb6bb3f1e189
 </body>
 
 </html>
