@@ -1,0 +1,28 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "minimal_index.py",
+      "use": "@vercel/python",
+      "config": {
+        "runtime": "python3.9",
+        "fluidCompute": true,
+        "maxDuration": 60
+      }
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/health",
+      "dest": "/minimal_index.py"
+    },
+    {
+      "src": "/api/minimal-tts",
+      "dest": "/minimal_index.py"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/minimal_index.py"
+    }
+  ]
+}
