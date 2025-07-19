@@ -475,9 +475,12 @@
             });
         });
 
-        // Update user name from Firebase
+        // Update user name from Firebase and verify token once
         firebase.auth().onAuthStateChanged(user => {
             if (user) {
+                // Verify token once when user logs in
+                verifyTokenOnce();
+                
                 const userNameElement = document.getElementById('user-name');
                 if (userNameElement) {
                     userNameElement.textContent = user.displayName || user.email || 'User';

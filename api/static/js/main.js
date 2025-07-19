@@ -44,9 +44,32 @@ offlineIndicator.textContent = 'You are currently offline';
 offlineIndicator.style.display = 'none';
 document.body.appendChild(offlineIndicator);
 
+// Create loading overlay for token verification
+const createLoadingOverlay = () => {
+    const overlay = document.createElement('div');
+    overlay.className = 'loading-overlay';
+    overlay.id = 'token-verification-overlay';
+    
+    const spinner = document.createElement('div');
+    spinner.className = 'loading-spinner';
+    
+    const message = document.createElement('div');
+    message.className = 'loading-message';
+    message.textContent = 'Verifying your account...';
+    
+    overlay.appendChild(spinner);
+    overlay.appendChild(message);
+    document.body.appendChild(overlay);
+    
+    return overlay;
+};
+
 // Function to verify Firebase token once when user logs in
 async function verifyTokenOnce() {
     if (firebase.auth().currentUser) {
+        // Show loading overlay
+        const overlay = createLoadingOverlay();
+        
         try {
             const token = await firebase.auth().currentUser.getIdToken(true);
             const response = await fetch('/api/verify-token', {
@@ -59,11 +82,41 @@ async function verifyTokenOnce() {
             
             if (response.ok) {
                 console.log('Token verified and cached on server');
+                // Show success message briefly before removing overlay
+                const message = overlay.querySelector('.loading-message');
+                message.textContent = 'Verification successful!';
+                message.style.color = '#4facfe';
+                
+                setTimeout(() => {
+                    // Remove overlay with fade-out effect
+                    overlay.classList.add('fade-out');
+                    setTimeout(() => {
+                        document.body.removeChild(overlay);
+                    }, 500);
+                }, 1000);
             } else {
                 console.error('Failed to verify token on server');
+                // Show error message
+                const message = overlay.querySelector('.loading-message');
+                message.textContent = 'Verification failed. Please try again.';
+                message.style.color = '#ff4d4d';
+                
+                setTimeout(() => {
+                    // Remove overlay
+                    document.body.removeChild(overlay);
+                }, 3000);
             }
         } catch (error) {
             console.error('Error verifying token:', error);
+            // Show error message
+            const message = overlay.querySelector('.loading-message');
+            message.textContent = 'Verification error. Please refresh the page.';
+            message.style.color = '#ff4d4d';
+            
+            setTimeout(() => {
+                // Remove overlay
+                document.body.removeChild(overlay);
+            }, 3000);
         }
     }
 }
