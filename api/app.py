@@ -373,6 +373,37 @@ def status():
 def index():
     return render_template('index.html')
 
+# New endpoint to verify and cache token once per session
+@app.route('/api/verify-token', methods=['POST'])
+def verify_token():
+    try:
+        # Log request headers for debugging (excluding sensitive information)
+        safe_headers = dict(request.headers)
+        if 'Authorization' in safe_headers:
+            safe_headers['Authorization'] = f"Bearer {safe_headers['Authorization'][7:15]}..." # Show only beginning of token
+        print(f"Token verification request headers: {safe_headers}")
+        
+        # Verify Firebase token
+        print("Attempting to verify and cache Firebase token...")
+        decoded_token = verify_firebase_token(request)
+        
+        if not decoded_token:
+            print("Token verification failed: No valid token provided")
+            return jsonify({'error': 'Unauthorized. Please log in.'}), 401
+        
+        # Get user ID from token
+        user_id = decoded_token.get('uid')
+        
+        # Store the verified user ID in session
+        session['verified_user_id'] = user_id
+        print(f"Token verified and cached for user: {user_id}")
+        
+        return jsonify({'success': True, 'message': 'Token verified and cached'})
+    except Exception as e:
+        print(f"Error in token verification: {str(e)}")
+        traceback.print_exc()
+        return jsonify({'error': str(e)}), 500
+
 @app.route('/api/chat', methods=['POST'])
 def chat():
     try:
@@ -382,22 +413,34 @@ def chat():
             safe_headers['Authorization'] = f"Bearer {safe_headers['Authorization'][7:15]}..." # Show only beginning of token
         print(f"Request headers: {safe_headers}")
         
-        # Verify Firebase token
-        print("Attempting to verify Firebase token...")
-        decoded_token = verify_firebase_token(request)
+        # Check if user is already verified in session
+        user_id = session.get('verified_user_id')
         
-        # Bypass authentication in both debug and production mode temporarily
-        # This is a temporary fix until the authentication issue is resolved
-        print("Bypassing authentication for testing.")
-        decoded_token = {"uid": "test-user-id"}
-        # TODO: Remove this bypass in production once authentication is working properly
-        
-        if not decoded_token:
-            print("Authentication failed: No valid token provided")
-            return jsonify({'error': 'Unauthorized. Please log in.'}), 401
+        # If not in session, verify token (fallback)
+        if not user_id:
+            print("User not found in session, verifying token...")
+            decoded_token = verify_firebase_token(request)
+            
+            # Bypass authentication in both debug and production mode temporarily
+            # This is a temporary fix until the authentication issue is resolved
+            if not decoded_token:
+                print("Bypassing authentication for testing.")
+                decoded_token = {"uid": "test-user-id"}
+                # TODO: Remove this bypass in production once authentication is working properly
+            
+            if not decoded_token:
+                print("Authentication failed: No valid token provided")
+                return jsonify({'error': 'Unauthorized. Please log in.'}), 401
+            
+            # Get user ID from token
+            user_id = decoded_token.get('uid')
+            # Store in session for future requests
+            session['verified_user_id'] = user_id
+        else:
+            print(f"Using cached verification for user: {user_id}")
         
         # Get user ID from token
-        user_id = decoded_token.get('uid')
+        user_id = user_id or "test-user-id"
         print(f"Authenticated user: {user_id}")
         
         user_input = request.json.get('message', '')
