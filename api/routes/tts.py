@@ -61,7 +61,12 @@ async def generate_speech(text, voice_id):
         
         temp_file = os.path.join(tmp_dir, f'speech_{unique_id}.mp3')
         
-        print(f"Generating speech to file: {temp_file}")
+        # Check if the file already exists (cache hit)
+        if os.path.exists(temp_file):
+            print(f"Cache hit: Using existing speech file: {temp_file}")
+            return temp_file
+            
+        print(f"Cache miss: Generating speech to file: {temp_file}")
         
         # Initialize TTS with the selected voice
         communicate = edge_tts.Communicate(text, voice_id)
@@ -75,7 +80,7 @@ async def generate_speech(text, voice_id):
         # But we'll keep the logic for local development
         if not tmp_dir.startswith('/tmp'):
             async def delete_file_after_delay():
-                await asyncio.sleep(300)  # 5 minutes
+                await asyncio.sleep(600)  # 10 minutes (increased from 5 for better caching)
                 try:
                     if os.path.exists(temp_file):
                         os.remove(temp_file)
@@ -106,7 +111,6 @@ def health_check():
 def text_to_speech():
     try:
         print("TTS endpoint called")
-        print(f"Python version: {os.sys.version}")
         print(f"Environment: {'serverless' if os.path.exists('/tmp') else 'local'}")
         
         # Check if request has JSON data
@@ -115,8 +119,8 @@ def text_to_speech():
             return jsonify({'error': 'Request must be JSON'}), 400
             
         data = request.json
-        print(f"Request data: {data}")
         
+        # Extract and validate text and voice parameters
         text = data.get('text', '')
         voice_id = data.get('voice', 'en-US-AvaNeural')  # Default voice
         
@@ -124,55 +128,73 @@ def text_to_speech():
             print("Error: No text provided")
             return jsonify({'error': 'No text provided'}), 400
         
+        # Truncate long logging to reduce overhead
+        log_text = text[:50] + ('...' if len(text) > 50 else '')
         print(f"Processing TTS request for voice: {voice_id}")
-        print(f"Text to convert: {text[:50]}{'...' if len(text) > 50 else ''}")
+        print(f"Text to convert: {log_text}")
         
-        # Try a simpler approach for serverless environment
         try:
             # Run the async function in a synchronous context
             temp_file = run_async(generate_speech(text, voice_id))
-            print(f"Speech generated successfully, saved to: {temp_file}")
             
-            # Check if we're using the /tmp directory (serverless environment)
-            if temp_file and temp_file.startswith('/tmp'):
-                # In serverless environments, we need to serve the file directly
-                # We'll return the file content as base64 encoded data
-                try:
-                    print(f"Reading file from {temp_file}")
-                    with open(temp_file, 'rb') as f:
-                        audio_data = f.read()
-                        print(f"Read {len(audio_data)} bytes from file")
-                        audio_base64 = base64.b64encode(audio_data).decode('utf-8')
-                        print("Successfully encoded audio to base64")
-                        return jsonify({
-                            'audio_data': audio_base64,
-                            'content_type': 'audio/mpeg',
-                            'is_base64': True
-                        })
-                except Exception as file_error:
-                    print(f"Error reading audio file: {str(file_error)}")
-                    traceback.print_exc()
-                    return jsonify({'error': f'Error reading audio file: {str(file_error)}'}), 500
-            elif temp_file:
-                # For local development, return a URL to the static file
-                file_url = f'/static/temp/{os.path.basename(temp_file)}'
-                print(f"Returning file URL: {file_url}")
-                return jsonify({'audio_url': file_url})
-            else:
+            if not temp_file or not os.path.exists(temp_file):
                 print("Error: Failed to generate speech file")
                 return jsonify({'error': 'Failed to generate speech'}), 500
                 
+            print(f"Speech file available at: {temp_file}")
+            
+            # Check if we're using the /tmp directory (serverless environment)
+            if temp_file.startswith('/tmp'):
+                # In serverless environments, return the file content as base64 encoded data
+                try:
+                    with open(temp_file, 'rb') as f:
+                        audio_data = f.read()
+                        audio_base64 = base64.b64encode(audio_data).decode('utf-8')
+                        
+                        # Return compressed response with cache headers
+                        response = jsonify({
+                            'audio_data': audio_base64,
+                            'content_type': 'audio/mpeg',
+                            'is_base64': True,
+                            'voice_used': voice_id
+                        })
+                        response.headers['Cache-Control'] = 'public, max-age=300'  # Cache for 5 minutes
+                        return response
+                except Exception as file_error:
+                    print(f"Error reading audio file: {str(file_error)}")
+                    return jsonify({'error': f'Error reading audio file: {str(file_error)}'}), 500
+            else:
+                # For local development, return a URL to the static file
+                file_url = f'/static/temp/{os.path.basename(temp_file)}'
+                
+                # Return response with cache headers
+                response = jsonify({
+                    'audio_url': file_url,
+                    'voice_used': voice_id
+                })
+                response.headers['Cache-Control'] = 'public, max-age=300'  # Cache for 5 minutes
+                return response
+                
         except Exception as speech_error:
             print(f"Error generating speech: {str(speech_error)}")
-            traceback.print_exc()
             return jsonify({'error': f'Error generating speech: {str(speech_error)}'}), 500
         
     except Exception as e:
         print(f"Error in text_to_speech: {str(e)}")
-        traceback.print_exc()
         return jsonify({'error': str(e)}), 500
 
 @tts_bp.route('/api/tts/voices', methods=['GET'])
 def get_voices():
-    """Return the list of available voices"""
-    return jsonify(VOICES)
+    """Return the list of available voices with caching"""
+    # This function will be cached at the application level
+    # when we register the blueprint with the app
+    try:
+        return jsonify({
+            'status': 'ok',
+            'voices': VOICES
+        })
+    except Exception as e:
+        return jsonify({
+            'status': 'error',
+            'message': str(e)
+        }), 500

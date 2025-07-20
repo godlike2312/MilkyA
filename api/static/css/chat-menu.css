@@ -138,6 +138,7 @@
     color: var(--text-color);
     font-size: 14px;
     margin-bottom: 15px;
+    outline: none;
 }
 
 .rename-dialog-actions {
@@ -166,9 +167,9 @@
 }
 
 .rename-confirm-btn {
-    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    background: var(--send-msg);
     border: none;
-    color: #fff;
+    color: var(--send-text);
 }
 
 .rename-confirm-btn:hover {
