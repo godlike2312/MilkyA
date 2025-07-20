@@ -1492,5 +1492,4 @@ def edge_tts_api():
 if os.environ.get('VERCEL_ENV'):
     print(f"Running in Vercel environment: {os.environ.get('VERCEL_ENV')}")
     # Disable debug mode in production
-    app.run()
     app.debug = False
