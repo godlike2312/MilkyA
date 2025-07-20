@@ -1,3 +1,1 @@
-# This file serves as the entry point for Vercel deployment
-# Vercel requires the app to be exposed directly as a module-level variable
-from api.app import app
+from app import app  # Import the Flask app from app.py
