@@ -15,6 +15,7 @@ from routes.tts import tts_bp
 
 # Initialize Firebase Admin SDK before creating the Flask app
 # This ensures Firebase is initialized exactly once and before any routes are defined
+app = Flask(__name__, static_folder='static', template_folder='templates')
 firebase_initialized = False
 
 def initialize_firebase():
@@ -94,7 +95,7 @@ firebase_init_success = initialize_firebase()
 print(f"Firebase initialization {'successful' if firebase_init_success else 'FAILED'}")
 
 # Create Flask app after Firebase initialization
-app = Flask(__name__, static_folder='static', template_folder='templates')  # Updated paths for Vercel with symbolic links
+  # Updated paths for Vercel with symbolic links
 app.secret_key = secrets.token_hex(16)  # Generate a secure secret key for sessions
 
 # Register the TTS blueprint
@@ -1493,3 +1494,4 @@ if os.environ.get('VERCEL_ENV'):
     print(f"Running in Vercel environment: {os.environ.get('VERCEL_ENV')}")
     # Disable debug mode in production
     app.debug = False
+    app.run()
