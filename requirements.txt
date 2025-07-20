@@ -12,5 +12,4 @@ grpcio>=1.62.0
 grpcio-status>=1.62.0
 google-api-core>=2.0.0
 # Added for API optimization
-Flask-Caching>=2.0.2
-Flask-Compress>=1.13
+# Removed Flask-Caching and Flask-Compress to reduce deployment size

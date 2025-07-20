@@ -11,8 +11,6 @@ import base64
 import io
 import asyncio
 import edge_tts
-from flask_caching import Cache
-from flask_compress import Compress
 from routes.tts import tts_bp
 
 # Initialize Firebase Admin SDK before creating the Flask app
@@ -99,28 +97,8 @@ print(f"Firebase initialization {'successful' if firebase_init_success else 'FAI
 app = Flask(__name__, static_folder='./static', template_folder='./templates')  # Updated paths for Vercel with symbolic links
 app.secret_key = secrets.token_hex(16)  # Generate a secure secret key for sessions
 
-# Initialize Flask-Compress for response compression
-compress = Compress()
-compress.init_app(app)
-
-# Configure Flask-Caching
-cache_config = {
-    "CACHE_TYPE": "SimpleCache",  # In-memory cache for simplicity
-    "CACHE_DEFAULT_TIMEOUT": 300,  # Default timeout in seconds (5 minutes)
-    "CACHE_THRESHOLD": 500,        # Maximum number of items the cache will store
-}
-cache = Cache(app, config=cache_config)
-
 # Register the TTS blueprint
 app.register_blueprint(tts_bp)
-
-# Apply caching to the TTS voices endpoint
-@cache.cached(timeout=300)  # Cache for 5 minutes
-def cached_get_voices():
-    return tts_bp.view_functions['get_voices']()
-
-# Replace the original get_voices function with the cached version
-tts_bp.view_functions['get_voices'] = cached_get_voices
 
 # OpenRouter API key - read from environment variable
 API_KEY = os.environ.get('OPENROUTER_API_KEY', '')
@@ -1201,7 +1179,6 @@ def chat():
         }), 500
 
 @app.route('/api/models', methods=['GET'])
-@cache.cached(timeout=600)  # Cache for 10 minutes
 def get_models():
     """Endpoint to get the available models for the settings page"""
     try:
@@ -1218,7 +1195,6 @@ def get_models():
         }), 500
 
 @app.route('/api/status', methods=['GET'])
-@cache.cached(timeout=300)  # Cache for 5 minutes
 def api_status():
     """Endpoint to check the status of the OpenRouter API and available models"""
     try:
