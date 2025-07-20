@@ -1494,4 +1494,3 @@ if os.environ.get('VERCEL_ENV'):
     print(f"Running in Vercel environment: {os.environ.get('VERCEL_ENV')}")
     # Disable debug mode in production
     app.debug = False
-    app.run()
