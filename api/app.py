@@ -94,7 +94,7 @@ firebase_init_success = initialize_firebase()
 print(f"Firebase initialization {'successful' if firebase_init_success else 'FAILED'}")
 
 # Create Flask app after Firebase initialization
-app = Flask(__name__)  # Updated paths for Vercel with symbolic links
+app = Flask(__name__, static_folder='static', template_folder='templates')  # Updated paths for Vercel with symbolic links
 app.secret_key = secrets.token_hex(16)  # Generate a secure secret key for sessions
 
 # Register the TTS blueprint
