@@ -13,9 +13,31 @@ import asyncio
 import edge_tts
 from routes.tts import tts_bp
 
+# Helper function to safely run async code in Flask routes
+def run_async(coro):
+    """Safely run an async coroutine in a synchronous context
+    
+    This function handles the case where an event loop is already running,
+    which can happen in certain environments like serverless functions.
+    """
+    try:
+        # Try using asyncio.run() first
+        return asyncio.run(coro)
+    except RuntimeError as e:
+        # Handle case where event loop is already running
+        if "There is no current event loop in thread" in str(e) or "This event loop is already running" in str(e):
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+            try:
+                return loop.run_until_complete(coro)
+            finally:
+                loop.close()
+        else:
+            print(f"RuntimeError in run_async: {str(e)}")
+            raise e
+
 # Initialize Firebase Admin SDK before creating the Flask app
 # This ensures Firebase is initialized exactly once and before any routes are defined
-app = Flask(__name__, static_folder='static', template_folder='templates')
 firebase_initialized = False
 
 def initialize_firebase():
@@ -95,7 +117,7 @@ firebase_init_success = initialize_firebase()
 print(f"Firebase initialization {'successful' if firebase_init_success else 'FAILED'}")
 
 # Create Flask app after Firebase initialization
-  # Updated paths for Vercel with symbolic links
+app = Flask(__name__, static_folder='static', template_folder='templates')  # Updated paths for Vercel with symbolic links
 app.secret_key = secrets.token_hex(16)  # Generate a secure secret key for sessions
 
 # Register the TTS blueprint
@@ -1473,8 +1495,8 @@ def edge_tts_api():
             audio_stream.seek(0)
             return audio_stream.read(), voice_to_use
         
-        # Run the async function
-        audio_bytes, voice_used = asyncio.run(synthesize())
+        # Run the async function using the global run_async helper
+        audio_bytes, voice_used = run_async(synthesize())
         
         # Encode the audio data as base64
         audio_b64 = base64.b64encode(audio_bytes).decode('utf-8')
