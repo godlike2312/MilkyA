@@ -131,7 +131,7 @@ if not API_KEY and app.debug:
     print("WARNING: OpenRouter API key not set. Please set OPENROUTER_API_KEY environment variable.")
 
 # Add Groq API key
-GROQ_API_KEY = os.environ.get('GROQ_API_KEY', '***REMOVED***')
+GROQ_API_KEY = os.environ.get('GROQ_API_KEY', '')
 
 # Add Together AI API key
 TOGETHER_API_KEY = os.environ.get('TOGETHER_API_KEY', '')
