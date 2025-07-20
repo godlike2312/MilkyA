@@ -292,7 +292,7 @@ def verify_firebase_token(request_obj):
     auth_header = request_obj.headers.get('Authorization')
     if not auth_header or not auth_header.startswith('Bearer '):
         print("No valid Authorization header found")
-        return "test_user_id"
+        return None
     
     # Extract the token
     token = auth_header.split('Bearer ')[1]
@@ -417,23 +417,32 @@ def chat():
             safe_headers['Authorization'] = f"Bearer {safe_headers['Authorization'][7:15]}..." # Show only beginning of token
         print(f"Request headers: {safe_headers}")
         
-        # Check if user is already verified in session
-        user_id = session.get('verified_user_id')
+        # Verify Firebase token for each request
+        user_id = None
+        auth_header = request.headers.get('Authorization')
         
-        # If not in session, use a test user ID without re-verifying token
-        # This avoids token verification for each query
-        if not user_id:
-            print("User not found in session, using test user ID")
-            # Use a test user ID for development/testing
-            user_id = "test-user-id"
-            # Store in session for future requests
-            session['verified_user_id'] = user_id
-            print(f"Set test user ID in session: {user_id}")
+        if auth_header and auth_header.startswith('Bearer '):
+            token = auth_header.split('Bearer ')[1]
+            try:
+                # Verify the token for each request
+                user_id = verify_firebase_token(token)
+                print(f"Token verified for user: {user_id}")
+            except Exception as e:
+                print(f"Error verifying token: {str(e)}")
+                # Only use test user ID in debug mode
+                if app.debug:
+                    user_id = "test-user-id"
+                    print(f"Debug mode: Using test user ID: {user_id}")
+                else:
+                    return jsonify({'error': 'Authentication failed. Please log in again.'}), 401
         else:
-            print(f"Using cached verification for user: {user_id}")
+            # Only use test user ID in debug mode
+            if app.debug:
+                user_id = "test-user-id"
+                print(f"Debug mode: No auth header, using test user ID: {user_id}")
+            else:
+                return jsonify({'error': 'Authentication required'}), 401
         
-        # Get user ID from session
-        user_id = user_id or "test-user-id"
         print(f"Authenticated user: {user_id}")
         
         user_input = request.json.get('message', '')
