@@ -11,7 +11,6 @@ import base64
 import io
 import asyncio
 import edge_tts
-from routes.tts import tts_bp
 
 # Initialize Firebase Admin SDK before creating the Flask app
 # This ensures Firebase is initialized exactly once and before any routes are defined
@@ -94,11 +93,8 @@ firebase_init_success = initialize_firebase()
 print(f"Firebase initialization {'successful' if firebase_init_success else 'FAILED'}")
 
 # Create Flask app after Firebase initialization
-app = Flask(__name__, static_folder='static', template_folder='templates')  # Updated paths for Vercel with symbolic links
+app = Flask(__name__, static_folder='./static', template_folder='./templates')  # Updated paths for Vercel with symbolic links
 app.secret_key = secrets.token_hex(16)  # Generate a secure secret key for sessions
-
-# Register the TTS blueprint
-app.register_blueprint(tts_bp)
 
 # OpenRouter API key - read from environment variable
 API_KEY = os.environ.get('OPENROUTER_API_KEY', '')
@@ -420,19 +416,30 @@ def chat():
         # Check if user is already verified in session
         user_id = session.get('verified_user_id')
         
-        # If not in session, use a test user ID without re-verifying token
-        # This avoids token verification for each query
+        # If not in session, verify token (fallback)
         if not user_id:
-            print("User not found in session, using test user ID")
-            # Use a test user ID for development/testing
-            user_id = "test-user-id"
+            print("User not found in session, verifying token...")
+            decoded_token = verify_firebase_token(request)
+            
+            # Bypass authentication in both debug and production mode temporarily
+            # This is a temporary fix until the authentication issue is resolved
+            if not decoded_token:
+                print("Bypassing authentication for testing.")
+                decoded_token = {"uid": "test-user-id"}
+                # TODO: Remove this bypass in production once authentication is working properly
+            
+            if not decoded_token:
+                print("Authentication failed: No valid token provided")
+                return jsonify({'error': 'Unauthorized. Please log in.'}), 401
+            
+            # Get user ID from token
+            user_id = decoded_token.get('uid')
             # Store in session for future requests
             session['verified_user_id'] = user_id
-            print(f"Set test user ID in session: {user_id}")
         else:
             print(f"Using cached verification for user: {user_id}")
         
-        # Get user ID from session
+        # Get user ID from token
         user_id = user_id or "test-user-id"
         print(f"Authenticated user: {user_id}")
         
@@ -442,25 +449,6 @@ def chat():
         
         print(f"Received model selection from frontend: {selected_model_key}")
         print(f"Received chat history with {len(chat_history)} messages")
-        
-        # Process chat history to handle large content
-        MAX_CONTENT_LENGTH = 1000  # Maximum length for message content
-        processed_chat_history = []
-        for msg in chat_history:
-            if 'content' in msg and isinstance(msg['content'], str):
-                content = msg['content']
-                if len(content) > MAX_CONTENT_LENGTH:
-                    # Extract title from large content (first few words)
-                    title = content.split()[:5]
-                    title = ' '.join(title) + '...' if len(content.split()) > 5 else content
-                    # Replace large content with title
-                    msg = msg.copy()  # Create a copy to avoid modifying the original
-                    msg['content'] = f"[Large content: {title}]"
-                    print(f"Truncated large message content ({len(content)} chars) to title")
-            processed_chat_history.append(msg)
-        
-        # Replace original chat history with processed version
-        chat_history = processed_chat_history
         
         # Validate the model key exists, otherwise use default
         if selected_model_key not in MODEL_OPTIONS:
@@ -557,7 +545,7 @@ def chat():
                 messages = [
                     {
                         "role": "system",
-                        "content": "You are NumAI, a helpful assistant . When a user says only 'hello', respond with just 'Hello! How can I help you today?' and nothing more. For all other queries, respond normally with appropriate markdown formatting: **bold text** for titles, backticks for code, and proper code blocks with language specification. You can use emoji shortcodes like :smile:, :thinking:, :idea:, :code:, :warning:, :check:, :star:, :heart:, :info:, and :rocket: in your responses. When providing code examples, make it clear these are standalone examples."
+                        "content": "You are NumAI, a helpful assistant . When a user says only 'hello', respond with just 'Hello! How can I help you today?' and nothing more. when user says 'What is NumAI', repond with this information 'NumAI is Service That provides AI Model use For free' when user says 'how many models you or NumAI have', respond 'there is a catogory 1. Ultra fast model , 2. Text Based models , 3. Coders , In Ultra fast catagory 1. Milky 8B , 2.Milky 70B , 3.Milky S2, 4. Milky 2o, In Text Based Catagory 1. Milky 3.1 , 2. Milky Small, 3. Milky 3.7, 4. Milky V2, in Coders Catagory 1. MilkyCoder Pro, 2. Milky 3.7 Sonnet, 3. Sonnet Seek, 4. Milky Fast' For all other queries, respond normally with appropriate markdown formatting: **bold text** for titles, backticks for code, and proper code blocks with language specification. You can use emoji shortcodes like :smile:, :thinking:, :idea:, :code:, :warning:, :check:, :star:, :heart:, :info:, and :rocket: in your responses. When providing code examples, make it clear these are standalone examples."
                     },
                     {
                         "role": "user",
@@ -662,7 +650,7 @@ def chat():
                     messages = [
                         {
                             "role": "system",
-                            "content": "You are NumAI, a helpful assistant . When a user says only 'hello', respond with just 'Hello! How can I help you today?' and nothing more. For all other queries, respond normally with appropriate markdown formatting: **bold text** for titles, backticks for code, and proper code blocks with language specification. You can use emoji shortcodes like :smile:, :thinking:, :idea:, :code:, :warning:, :check:, :star:, :heart:, :info:, and :rocket: in your responses. When providing code examples, make it clear these are standalone examples."
+                            "content": "You are NumAI, a helpful assistant . When a user says only 'hello', respond with just 'Hello! How can I help you today?' and nothing more. when user says 'What is NumAI', repond with this information 'NumAI is Service That provides AI Model use For free' when user says 'how many models you or NumAI have', respond 'there is a catogory 1. Ultra fast model , 2. Text Based models , 3. Coders , In Ultra fast catagory 1. Milky 8B , 2.Milky 70B , 3.Milky S2, 4. Milky 2o, In Text Based Catagory 1. Milky 3.1 , 2. Milky Small, 3. Milky 3.7, 4. Milky V2, in Coders Catagory 1. MilkyCoder Pro, 2. Milky 3.7 Sonnet, 3. Sonnet Seek, 4. Milky Fast' For all other queries, respond normally with appropriate markdown formatting: **bold text** for titles, backticks for code, and proper code blocks with language specification. You can use emoji shortcodes like :smile:, :thinking:, :idea:, :code:, :warning:, :check:, :star:, :heart:, :info:, and :rocket: in your responses. When providing code examples, make it clear these are standalone examples."
                         },
                         {
                             "role": "user",
@@ -676,7 +664,7 @@ def chat():
                         print(f"[Groq] Adding default system message")
                         validated_messages.insert(0, {
                             "role": "system",
-                            "content": "You are NumAI, a helpful assistant . When a user says only 'hello', respond with just 'Hello! How can I help you today?' and nothing more. For all other queries, respond normally with appropriate markdown formatting: **bold text** for titles, backticks for code, and proper code blocks with language specification. You can use emoji shortcodes like :smile:, :thinking:, :idea:, :code:, :warning:, :check:, :star:, :heart:, :info:, and :rocket: in your responses. When providing code examples, make it clear these are standalone examples."
+                            "content": "You are NumAI, a helpful assistant . When a user says only 'hello', respond with just 'Hello! How can I help you today?' and nothing more. when user says 'What is NumAI', repond with this information 'NumAI is Service That provides AI Model use For free' when user says 'how many models you or NumAI have', respond 'there is a catogory 1. Ultra fast model , 2. Text Based models , 3. Coders , In Ultra fast catagory 1. Milky 8B , 2.Milky 70B , 3.Milky S2, 4. Milky 2o, In Text Based Catagory 1. Milky 3.1 , 2. Milky Small, 3. Milky 3.7, 4. Milky V2, in Coders Catagory 1. MilkyCoder Pro, 2. Milky 3.7 Sonnet, 3. Sonnet Seek, 4. Milky Fast' For all other queries, respond normally with appropriate markdown formatting: **bold text** for titles, backticks for code, and proper code blocks with language specification. You can use emoji shortcodes like :smile:, :thinking:, :idea:, :code:, :warning:, :check:, :star:, :heart:, :info:, and :rocket: in your responses. When providing code examples, make it clear these are standalone examples."
                         })
                     
                     # Ensure the last message is from the user
@@ -694,7 +682,7 @@ def chat():
                 messages = [
                     {
                         "role": "system",
-                        "content": "You are NumAI, a helpful assistant . When a user says only 'hello', respond with just 'Hello! How can I help you today?' and nothing more. For all other queries, respond normally with appropriate markdown formatting: **bold text** for titles, backticks for code, and proper code blocks with language specification. You can use emoji shortcodes like :smile:, :thinking:, :idea:, :code:, :warning:, :check:, :star:, :heart:, :info:, and :rocket: in your responses. When providing code examples, make it clear these are standalone examples."
+                        "content": "You are NumAI, a helpful assistant . When a user says only 'hello', respond with just 'Hello! How can I help you today?' and nothing more. when user says 'What is NumAI', repond with this information 'NumAI is Service That provides AI Model use For free' when user says 'how many models you or NumAI have', respond 'there is a catogory 1. Ultra fast model , 2. Text Based models , 3. Coders , In Ultra fast catagory 1. Milky 8B , 2.Milky 70B , 3.Milky S2, 4. Milky 2o, In Text Based Catagory 1. Milky 3.1 , 2. Milky Small, 3. Milky 3.7, 4. Milky V2, in Coders Catagory 1. MilkyCoder Pro, 2. Milky 3.7 Sonnet, 3. Sonnet Seek, 4. Milky Fast' For all other queries, respond normally with appropriate markdown formatting: **bold text** for titles, backticks for code, and proper code blocks with language specification. You can use emoji shortcodes like :smile:, :thinking:, :idea:, :code:, :warning:, :check:, :star:, :heart:, :info:, and :rocket: in your responses. When providing code examples, make it clear these are standalone examples."
                     },
                     {
                         "role": "user",
@@ -1214,8 +1202,7 @@ def api_status():
         # Check API key status
         key_status_response = requests.get(
             url="https://openrouter.ai/api/v1/auth/key",
-            headers=get_openrouter_headers(request),
-            timeout=10  # Add timeout to prevent hanging requests
+            headers=get_openrouter_headers(request)
         )
         
         if key_status_response.status_code != 200:
@@ -1232,31 +1219,22 @@ def api_status():
         # Check models availability
         models_response = requests.get(
             url="https://openrouter.ai/api/v1/models",
-            headers=get_openrouter_headers(request),
-            timeout=10  # Add timeout to prevent hanging requests
+            headers=get_openrouter_headers(request)
         )
         
         models_data = models_response.json() if models_response.status_code == 200 else {'error': 'Failed to fetch models'}
         
-        # Prepare response with diagnostic information - optimize by filtering and limiting data
+        # Prepare response with diagnostic information
         available_models = []
         if 'data' in models_data:
-            # Only process models that are in our AVAILABLE_MODELS list
-            # This is more efficient than processing all models
-            available_model_ids = set(AVAILABLE_MODELS)
             for model in models_data['data']:
                 model_id = model.get('id')
-                if model_id in available_model_ids:
-                    # Only include essential fields to reduce response size
+                if model_id in AVAILABLE_MODELS:
                     available_models.append({
                         'id': model_id,
                         'name': model.get('name', 'Unknown'),
                         'context_length': model.get('context_length', 0),
-                        # Only include basic pricing info to reduce payload size
-                        'pricing': {
-                            'prompt': model.get('pricing', {}).get('prompt', 0),
-                            'completion': model.get('pricing', {}).get('completion', 0)
-                        }
+                        'pricing': model.get('pricing', {})
                     })
         
         return jsonify({
@@ -1267,13 +1245,6 @@ def api_status():
             'server_time': time.strftime('%Y-%m-%d %H:%M:%S')
         })
     
-    except requests.exceptions.Timeout:
-        print("Timeout while fetching API status")
-        return jsonify({
-            'status': 'error',
-            'message': 'Request to OpenRouter API timed out. Please try again later.',
-            'server_time': time.strftime('%Y-%m-%d %H:%M:%S')
-        }), 504
     except Exception as e:
         error_details = traceback.format_exc()
         print(f"Error in API status endpoint: {str(e)}\n{error_details}")

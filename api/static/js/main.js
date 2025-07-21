@@ -193,7 +193,7 @@ document.addEventListener('DOMContentLoaded', adjustViewportForMobile);
 let chatHistory = [
     { 
         role: 'system', 
-        content: 'You are NumAI, a helpful assistant. When a user says only \'hello\', respond with just \'Hello! How can I help you today?\' and nothing more. For all other queries, respond normally with appropriate markdown formatting: **bold text** for titles, backticks for code, and proper code blocks with language specification. You can use emoji shortcodes like :smile:, :thinking:, :idea:, :code:, :warning:, :check:, :star:, :heart:, :info:, and :rocket: in your responses. When providing code examples, make it clear these are standalone examples.'
+        content: 'You are NumAI, a sophisticated AI assistant powered by advanced language models. NumAI is a AI chat WebPage. You have access to various AI models including GPT-4o, Reasoner 3.5, Dev 2.4 sonnet, Milky Basic, Milky-S1, MilkyCoder Pro, Milky 3.7 sonnet, Milky Fast-7o, Milky Edge, Milky S2, and Milky 2o.\n\nImportant guidelines:\n1. DO NOT provide code examples or solutions unless explicitly requested by the user.\n2. When a user says only \'hello\', respond with just \'Hello! How can I help you today?\' and nothing more.\n3. For all other queries, respond concisely with appropriate markdown formatting: **bold text** for titles, backticks for code, and proper code blocks with language specification.\n4. You can use emoji shortcodes like :smile:, :thinking:, :idea:, :code:, :warning:, :check:, :star:, :heart:, :info:, and :rocket: in your responses.\n5. If the user asks for code, provide clear, well-commented examples with proper explanations.\n6. Always prioritize clarity and relevance in your responses.\n7. Avoid unnecessary verbosity and focus on directly addressing the user\'s query. Ask Questions to get more robust solution'
     }
 ];
 
@@ -770,6 +770,13 @@ function addMessage(content, type, isOfflineMessage = false, modelId = null) {
     const messageDiv = document.createElement('div');
     messageDiv.classList.add('message', type);
     
+    // Store original content as a data attribute for potential reprocessing
+    if (type === 'assistant') {
+        // Ensure we're storing the raw content before any processing
+        messageDiv.setAttribute('data-original-content', content);
+        console.log('Storing original content for assistant message:', content.substring(0, 50) + '...');
+    }
+    
     // Create a message content container for all message types
     const messageContent = document.createElement('div');
     messageContent.classList.add('message-content');
@@ -988,7 +995,7 @@ function addMessage(content, type, isOfflineMessage = false, modelId = null) {
                     notification.textContent = `Voice substituted: ${voiceName}`;
                     notification.style.backgroundColor = 'rgba(255,193,7,0.9)';
                 } else {
-                    notification.textContent = `Using voice: ${voiceName}`;
+                    // notification.textContent = `Using voice: ${voiceName}`;
                     notification.style.backgroundColor = 'rgba(0,0,0,0.7)';
                 }
                 
@@ -1297,13 +1304,30 @@ async function sendMessage(message) {
             }
         }
 
+        // Process chat history to handle large content before sending to API
+        const MAX_CONTENT_LENGTH = 1000; // Maximum length for message content
+        const processedChatHistory = chatHistory.map(msg => {
+            if (msg.content && typeof msg.content === 'string' && msg.content.length > MAX_CONTENT_LENGTH) {
+                // Create a copy of the message to avoid modifying the original
+                const processedMsg = {...msg};
+                // Extract title from large content (first few words)
+                const words = msg.content.split(' ');
+                const title = words.slice(0, 5).join(' ') + (words.length > 5 ? '...' : '');
+                // Replace large content with title
+                processedMsg.content = `[Large content: ${title}]`;
+                console.log(`Truncated large message content (${msg.content.length} chars) to title`);
+                return processedMsg;
+            }
+            return msg;
+        });
+
         const response = await fetch('/api/chat', {
             method: 'POST',
             headers,
             body: JSON.stringify({
                 message,
                 model: currentModel,
-                chatHistory
+                chatHistory: processedChatHistory
             }),
             signal
         });
@@ -1370,7 +1394,27 @@ async function sendMessage(message) {
                         for (let j = 0; j < part.length; j += 100) {
                             if (shouldCancelTyping()) throw new Error('Typing cancelled');
                             processedParts[i] += part.substring(j, j + 100);
-                            messageContent.innerHTML = renderEmojiMarkdown(processedParts.join('```'));
+                            
+                            // Use parseCodeBlocks instead of renderEmojiMarkdown for proper code block rendering
+                            const processedContent = processedParts.join('```');
+                            messageContent.innerHTML = parseCodeBlocks(processedContent);
+                            
+                            // Store the original content as a data attribute on the message div
+                            const messageDiv = messageContent.closest('.message');
+                            if (messageDiv && !messageDiv.hasAttribute('data-original-content')) {
+                                messageDiv.setAttribute('data-original-content', content);
+                                console.log('Setting original content in renderEmojiMarkdown');
+                            }
+                            
+                            // Apply syntax highlighting to any code blocks that have been rendered
+                            messageContent.querySelectorAll('pre code').forEach(block => {
+                                try {
+                                    hljs.highlightElement(block);
+                                } catch (e) {
+                                    console.error('Error applying syntax highlighting:', e);
+                                }
+                            });
+                            
                             chatMessages.scrollTop = chatMessages.scrollHeight;
                             await new Promise(r => setTimeout(r, 10));
                         }
@@ -1384,7 +1428,16 @@ async function sendMessage(message) {
                     for (let i = 0; i < content.length; i += 15) {
                         if (shouldCancelTyping()) throw new Error('Typing cancelled');
                         formattedContent += content.substring(i, i + 15);
-                        messageContent.innerHTML = renderEmojiMarkdown(formattedContent);
+                        
+                        // Process markdown and emojis
+                        let processedContent = marked.parse(formattedContent);
+                        
+                        // Apply emoji replacement directly
+                        if (window.replaceEmojis && typeof window.replaceEmojis === 'function') {
+                            processedContent = window.replaceEmojis(processedContent);
+                        }
+                        
+                        messageContent.innerHTML = processedContent;
                         chatMessages.scrollTop = chatMessages.scrollHeight;
                         await new Promise(r => setTimeout(r, 0));
                     }
@@ -1392,6 +1445,14 @@ async function sendMessage(message) {
             } catch (err) {
                 console.log('Typing animation cancelled');
                 messageContent.innerHTML = renderEmojiMarkdown(completeContent);
+                
+                // Store the original content as a data attribute on the message div
+                const messageDiv = messageContent.closest('.message');
+                if (messageDiv && !messageDiv.hasAttribute('data-original-content')) {
+                    messageDiv.setAttribute('data-original-content', completeContent);
+                    console.log('Setting original content in renderEmojiMarkdown catch block');
+                }
+                
                 chatMessages.scrollTop = chatMessages.scrollHeight;
             }
 
@@ -2387,6 +2448,8 @@ async function loadChat(chatId) {
                     ];
                     
                     messages.forEach(msg => {
+                        // Add message to the UI
+                        // This will set data-original-content for assistant messages
                         addMessage(msg.content, msg.role, false, msg.modelId);
                         
                         // Add to chat history array (skip system messages)
@@ -2449,6 +2512,8 @@ async function loadChat(chatId) {
                         ];
                         
                         messages.forEach(msg => {
+                            // Add message to the UI
+                            // This will set data-original-content for assistant messages
                             addMessage(msg.content, msg.role, false, msg.modelId);
                             
                             // Add to chat history array (skip system messages)
@@ -2500,18 +2565,60 @@ async function loadChat(chatId) {
     // Apply syntax highlighting and ensure we scroll to the bottom of the chat
     // with a short delay to allow DOM to fully update
     setTimeout(() => {
-        // Apply syntax highlighting to all code blocks in assistant messages
-        document.querySelectorAll('.message.assistant pre code').forEach(block => {
+        // Fix any formatting issues with code blocks in assistant messages
+        document.querySelectorAll('.message.assistant').forEach(messageDiv => {
             try {
-                console.log('Applying syntax highlighting to code block in loadChat');
-                hljs.highlightElement(block);
+                // Get the original markdown content from the data attribute
+                const originalContent = messageDiv.getAttribute('data-original-content');
+                const messageContent = messageDiv.querySelector('.message-content');
+                
+                if (originalContent) {
+                    console.log('Found original content for message:', originalContent.substring(0, 50) + '...');
+                    
+                    if (originalContent.includes('```')) {
+                        console.log('Reprocessing code blocks in loaded message using original content');
+                        // Reprocess the original content with parseCodeBlocks
+                        messageContent.innerHTML = parseCodeBlocks(originalContent);
+                        
+                        // Apply syntax highlighting to all code blocks
+                        messageContent.querySelectorAll('pre code').forEach(block => {
+                            try {
+                                hljs.highlightElement(block);
+                            } catch (e) {
+                                console.error('Error applying syntax highlighting:', e);
+                            }
+                        });
+                    } else if (originalContent.includes('`')) {
+                        // Handle inline code if no code blocks
+                        console.log('Processing markdown with inline code');
+                        const renderer = new marked.Renderer();
+                        const originalLink = renderer.link;
+                        
+                        renderer.link = function(href, title, text) {
+                            const link = originalLink.call(this, href, title, text);
+                            return link.replace('<a ', '<a target="_blank" rel="noopener noreferrer" ');
+                        };
+                        
+                        messageContent.innerHTML = marked.parse(originalContent, { renderer });
+                    }
+                } else {
+                    console.log('No original content found for message, applying highlighting only');
+                    // If no original content is available, just apply highlighting
+                    messageContent.querySelectorAll('pre code').forEach(block => {
+                        try {
+                            hljs.highlightElement(block);
+                        } catch (e) {
+                            console.error('Error applying syntax highlighting:', e);
+                        }
+                    });
+                }
             } catch (e) {
-                console.error('Error applying syntax highlighting in loadChat:', e);
+                console.error('Error fixing code block formatting in loadChat:', e);
             }
         });
         
         chatMessages.scrollTop = chatMessages.scrollHeight;
-    }, 200); // Increased timeout to ensure DOM is fully updated
+    }, 300); // Increased timeout to ensure DOM is fully updated
 }
 
 // Show rename dialog
@@ -3633,6 +3740,12 @@ function processTextForSpeech(messageContentElement) {
         block.textContent = 'Code block skipped for speech.';
     });
     
+    // Replace links with a generic phrase
+    const links = tempElement.querySelectorAll('a');
+    links.forEach(link => {
+        link.textContent = "Here's the website link";
+    });
+    
     // Get the text content
     let text = tempElement.textContent;
     
@@ -3645,4 +3758,3 @@ function processTextForSpeech(messageContentElement) {
     
     return text;
 }
-
