@@ -46,11 +46,3 @@ body.light-mode{--hljs-color:#383a42;--hljs-background:#fafafa;--hljs-keyword:#a
   white-space: pre-wrap;
   word-break: break-word;
 }
-<<<<<<< HEAD
-=======
-
-/* Ensure code blocks in light mode have proper contrast */
-body.light-mode .code-block pre {
-  background: var(--hljs-background);
-}
->>>>>>> a5da6eb90ea3d1119c2328a05bdfdb6bb3f1e189

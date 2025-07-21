@@ -571,8 +571,8 @@ input:checked + .toggle-slider:before {
     justify-content: center;
     align-items: center;
     padding: 8px 16px;
-    background: linear-gradient(135deg, #252525, #727272);
-    color: white;
+    background: var(--send-msg);
+    color: var(--send-text);
     border: none;
     border-radius: 8px;
     cursor: pointer;
@@ -602,8 +602,8 @@ input:checked + .toggle-slider:before {
     bottom: 20px;
     left: 50%;
     transform: translateX(-50%);
-    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-    color: white;
+    background: white;
+    color: black;
     padding: 10px 20px;
     border-radius: 30px;
     font-weight: 500;
@@ -720,18 +720,12 @@ input:checked + .toggle-slider:before {
 
 /* Profile Info */
 .profile-info {
-    background-color: var(--bg-secondary);
     border-radius: 12px;
     padding: 20px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    border: 1px solid var(--border-color);
     transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
-.profile-info:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
-}
 
 .profile-field {
     margin-bottom: 18px;
@@ -745,16 +739,6 @@ input:checked + .toggle-slider:before {
     margin-bottom: 0;
 }
 
-.profile-field::before {
-    content: '';
-    position: absolute;
-    left: 0;
-    top: 0;
-    height: 100%;
-    width: 2px;
-    background: linear-gradient(to bottom, var(--primary-color), transparent);
-    border-radius: 2px;
-}
 
 .profile-field label {
     font-size: 0.85rem;

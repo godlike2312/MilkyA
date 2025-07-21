@@ -48,6 +48,7 @@ body {
     --canvas-header: #2f2f2f;
     --canvas-codemirror: #212121;
     --inline-code:black;
+    --profile-bg: #6363632b
 }
 
 body.light-mode {
@@ -75,6 +76,7 @@ body.light-mode {
     --canvas-header: #dddddd;
     --canvas-codemirror: #d7d7d7;
     --inline-code: none;
+    --profile-bg: #0000002b
 }
 
 .container {
@@ -309,11 +311,11 @@ main {
 
 /* User Profile Section */
 .user-profile {
+    border-top: 1px solid var(--border-color);
     display: flex;
     align-items: center;
     justify-content: space-between;
     padding: 15px 20px;
-    border-top: 1px solid var(--border-color);
     margin-top: auto;
 }
 
@@ -490,10 +492,9 @@ main {
     background-color: rgba(60, 60, 60, 0.7);
 }
 
-/* .chat-item.active {
-    background-color: rgba(79, 172, 254, 0.2);
-    border-left: 3px solid #4facfe;
-} */
+.chat-item.active {
+    background-color: rgba(255, 255, 255, 0.185);
+}
 
 .chat-section {
     flex: 1;
@@ -1105,6 +1106,9 @@ h3.content-title {
     color: #121212;
     margin-top: 0.5rem;
     margin-bottom: 0.5rem;
+    border-radius: 35px;
+    max-width: 60%;
+    min-width: 60px;
 }
 
 .assistant {
@@ -1708,7 +1712,7 @@ body.light-mode .chat-item:hover {
 }
 
 body.light-mode .chat-item.active {
-    background-color: rgba(79, 172, 254, 0.1);
+    background-color: rgb(0 0 0 / 22%);
 }
 
 body.light-mode .chat-container {
@@ -1937,6 +1941,16 @@ body.offline .message-input-container::after {
     --vh: 1vh;
 }
 
+@media (max-width:350px){
+    .imag-model{
+        left: -6.5rem;
+    }
+}
+@media (max-width:375px){
+    .imag-model{
+        left: -9.5rem;
+    }
+}
 @media (max-width: 768px) {
     body {
         overflow: hidden; /* Prevent body scrolling */

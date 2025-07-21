@@ -11,6 +11,8 @@ body{font-family: sans-serif;}
     --text-light: #333;
     --error-color: #ef4444;
     --success-color: #10b981;
+    --send-msg: white;
+    --send-text: black;
 }
 *{margin:0;
 padding: 0;}
@@ -122,7 +124,9 @@ padding: 0;}
 .remember-me input[type="checkbox"] {
     accent-color: var(--primary-color);
 }
-
+.remember-me a{
+    color: #0075ffd9;
+}
 .forgot-password {
     color: var(--primary-color);
     text-decoration: none;
@@ -135,10 +139,10 @@ padding: 0;}
 
 .auth-btn {
     padding: 0.8rem;
-    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-    border: none;
+    background: var(--send-msg);
+    border: 1px solid rgba(255, 255, 255, 0.178);
     border-radius: 8px;
-    color: #121212;
+    color: var(--send-text);
     font-weight: 600;
     font-size: 1rem;
     cursor: pointer;
@@ -147,8 +151,9 @@ padding: 0;}
 }
 
 .auth-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(79, 172, 254, 0.4);
+    background: var(--send-text);
+    border: 1px solid rgba(255, 255, 255, 0.199);
+    color: var(--send-msg);
 }
 
 .auth-divider {
