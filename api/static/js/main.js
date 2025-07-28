@@ -862,10 +862,10 @@ function addMessage(content, type, isOfflineMessage = false, modelId = null) {
         
         // Add feedback buttons
         feedbackButtons.innerHTML = `
-            <button class="feedback-btn like-btn" title="Like"><i class="fas fa-thumbs-up"></i></button>
-            <button class="feedback-btn dislike-btn" title="Dislike"><i class="fas fa-thumbs-down"></i></button>
-            <button class="feedback-btn copy-btn" title="Copy"><i class="fas fa-copy"></i></button>
-            <button class="feedback-btn speak-btn" title="Speak"><i class="fas fa-volume-up"></i></button>
+            <button class="feedback-btn like-btn" data-tooltip="Good Response"><i class="fas fa-thumbs-up"></i></button>
+            <button class="feedback-btn dislike-btn" data-tooltip="Bad Response"><i class="fas fa-thumbs-down"></i></button>
+            <button class="feedback-btn copy-btn" data-tooltip="Copy"><i class="fas fa-copy"></i></button>
+            <button class="feedback-btn speak-btn" data-tooltip="Read aloud"><i class="fas fa-volume-up"></i></button>
         `;
         
         // Append feedback buttons to the container
@@ -1189,7 +1189,7 @@ function parseCodeBlocks(content) {
             }
             // Group Copy and Edit buttons in a flex container
             result += '<div class="code-buttons">';
-            result += '<button class="copy-code-btn" onclick="copyCodeToClipboard(this, event)">Copy</button>';
+            result += '<button class="copy-code-btn" data-tooltip="Copy" onclick="copyCodeToClipboard(this, event)">Copy</button>';
             result += '<button class="edit-code-btn" data-tooltip="Edit in Canvas" title="Edit in Canvas"><i class="fas fa-pencil-alt"></i> Edit</button>';
             result += '</div>';
             result += '</div>';
@@ -2858,7 +2858,7 @@ if (document.body) {
       const originalCode = code.textContent;
       const languageClass = code.className || '';
       let mode = 'javascript';
-      if (languageClass.includes('python')) mode = 'python';
+      if (languageClass.includes('python')) mode = 'py';
       else if (languageClass.includes('html')) mode = 'htmlmixed';
       else if (languageClass.includes('css')) mode = 'css';
       else if (languageClass.includes('xml')) mode = 'xml';
@@ -2892,7 +2892,7 @@ if (document.body) {
             <button class="canvas-close-btn" data-tooltip="Close">&times;</button>
           </div>
           <div class="canvas-editor-controls">
-            <button id="copy-code-btn" class="editor-action-btn" data-tooltip="Copy Code">
+            <button id="copy-code-btn" class="editor-action-btn" data-tooltip="Copy">
               <i class="fas fa-copy"></i>
             </button>
             <button id="save-code-btn" class="editor-action-btn" data-tooltip="Save Code">

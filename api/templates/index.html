@@ -54,21 +54,47 @@
     <div class="container">
         <div class="sidebar">
             <div class="sidebar-header">
-                <div class="logo">
-                    <img src="{{ url_for('static', filename='img/model-logos/milky-edge.svg') }}" alt="NumAI Logo"
-                        class="logo-image">
-                    <h1 class="robotic-font">NumAI</h1>
-                </div>
+                <a href="">
+                    <div class="logo">
+                        <img src="{{ url_for('static', filename='img/model-logos/milky-edge.svg') }}" alt="NumAI Logo"
+                            class="logo-image">
+                        <h1 class="robotic-font">NumAI</h1>
+                    </div>
+                </a>
             </div>
             <div class="sidebar-toggle-container">
-                <div class="sidebar-toggle">
+                <div class="sidebar-toggle" data-tooltip="Toggle Sidebar">
                     <img src="{{ url_for('static', filename='img/sidebar-icon.svg') }}" alt="Toggle Sidebar">
                 </div>
             </div>
-            <div class="new-chat">
-                <img src="{{ url_for('static', filename='img/new-chat-icon.svg') }}" alt="New Chat"
-                    class="sidebar-icon">
-                <span>New Chat</span>
+            <div class="outer-new-chat">
+                <div class="new-chat" data-tooltip="New Chat">
+                    <svg width="64" height="64" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg"
+                        class="sidebar-icon">
+                        <!-- Square background with rounded corners -->
+                        <rect x="8" y="8" width="48" height="48" rx="8" ry="8" fill="none" stroke-width="2" />
+
+                        <!-- Chat bubble outline -->
+                        <path
+                            d="M20 22H44C46 22 48 24 48 26V38C48 40 46 42 44 42L35 42L32 48L29 42H20C18 42 16 40 16 38V26C16 24 18 22 20 22Z"
+                            fill="none" stroke-width="1.5" />
+
+                        <!-- Plus sign -->
+                        <line x1="26" y1="32" x2="38" y2="32" stroke-width="1.5" />
+                        <line x1="32" y1="26" x2="32" y2="38" stroke-width="1.5" />
+
+                        <!-- Floating stars -->
+                        <path d="M14 16l0.5 1.5L16 18l-1.5 0.5L14 20l-0.5-1.5L12 18l1.5-0.5z" fill="none" />
+                        <path d="M48 14l0.5 1L49 15.5l-0.5 0.5L48 17l-0.5-1L47 15.5l0.5-0.5z" fill="none" />
+                        <path d="M50 46l0.3 0.7L51 47l-0.7 0.3L50 48l-0.3-0.7L49 47l0.7-0.3z" fill="none" />
+                        <path d="M18 50l0.3 0.7L19 51l-0.7 0.3L18 52l-0.3-0.7L17 51l0.7-0.3z" fill="none" />
+                    </svg>
+
+
+
+
+                    <span>New Chat</span>
+                </div>
             </div>
             <div class="chat-history">
                 <!-- Chat history items will be added here -->
@@ -95,12 +121,27 @@
                 </div>
             </div>
             <div class="user-profile">
-                <div class="user-info" style="cursor: pointer;">
-                    <img src="{{ url_for('static', filename='img/user-icon.svg') }}" alt="User" class="sidebar-icon">
+                <div class="user-info" style="cursor: pointer;" data-tooltip="Profile">
+                    <svg width="64" height="64" viewBox="0 0 24 24" class="sidebar-icon"
+                        xmlns="http://www.w3.org/2000/svg" fill="none" stroke="black" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="2" y="2" width="20" height="20" rx="5" />
+                        <circle cx="12" cy="9" r="3" />
+                        <path d="M4 20c0-4 3-6 8-6s8 2 8 6" />
+                    </svg>
+
                     <span id="user-name">User</span>
                 </div>
-                <button id="logout-btn" class="logout-btn">
-                    <i class="fas fa-sign-out-alt"></i>
+                <button id="logout-btn" class="logout-btn" data-tooltip="Logout">
+                    <svg width="64" height="64" viewBox="0 0 24 24" class="sidebar-icon"
+                        xmlns="http://www.w3.org/2000/svg" fill="none" stroke="black" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="9" cy="7" r="4" />
+                        <path d="M15 3h6v6" />
+                        <path d="M10 14h11" />
+                        <path d="M21 14l-3-3" />
+                    </svg>
+
                 </button>
             </div>
         </div>
@@ -424,10 +465,10 @@
                         <div class="smoke-layer"></div>
                         <div class="smoke-layer"></div>
                     </div>
-                    
-                    <div class="bubble-content"> 
+
+                    <div class="bubble-content">
                         <!-- Audio analyzer visualization will be handled by JS -->
-                    </div> 
+                    </div>
                 </div>
                 <!-- Voice name moved outside the bubble -->
                 <div id="current-voice-name" class="voice-name-display"></div>
@@ -438,14 +479,14 @@
             <div class="voice-dropdown-container">
                 <div class="voice-new-css">
                     <select id="voice-modal-select" class="voice-select">
-                            <option value="en-US-AndrewMultilingualNeural">Andrew</option>
-                            <option value="en-US-RogerNeural">Roger</option>
-                            <option value="en-US-SteffanNeural">Jug</option>
-                            <option value="en-US-AvaNeural">Freddy</option>
-                            <option value="en-US-MichelleNeural">Fulfy</option> 
-                            <option value="en-US-AvaMultilingualNeural">Lua</option>
-                            <option value="en-US-JennyNeural">Jenny</option>
-                            <option value="en-US-SaraNeural">Sara</option>
+                        <option value="en-US-AndrewMultilingualNeural">Andrew</option>
+                        <option value="en-US-RogerNeural">Roger</option>
+                        <option value="en-US-SteffanNeural">Jug</option>
+                        <option value="en-US-AvaNeural">Freddy</option>
+                        <option value="en-US-MichelleNeural">Fulfy</option>
+                        <option value="en-US-AvaMultilingualNeural">Lua</option>
+                        <option value="en-US-JennyNeural">Jenny</option>
+                        <option value="en-US-SaraNeural">Sara</option>
                     </select>
                 </div>
                 <div class="done-new-c">
@@ -480,7 +521,7 @@
             if (user) {
                 // Verify token once when user logs in
                 verifyTokenOnce();
-                
+
                 const userNameElement = document.getElementById('user-name');
                 if (userNameElement) {
                     userNameElement.textContent = user.displayName || user.email || 'User';
