@@ -1338,7 +1338,7 @@ async function sendMessage(message) {
             if (response.status === 401) {
                 throw new Error('Authentication error: API key may be missing or invalid');
             } else {
-                throw new Error('Failed to get response from API');
+                throw new Error('Error Occured please Try again later');
             }
         }
 
@@ -1767,7 +1767,7 @@ async function sendMessage(message) {
             if (error.message.includes('API key')) {
                 addMessage('Error: The API key is missing or invalid. Please check the server configuration.', 'system');
             } else {
-                addMessage(`An error occurred: ${error.message}`, 'system');
+                addMessage(`${error.message}`, 'system');
             }
         }
 
@@ -1798,7 +1798,7 @@ if (stopBtn) {
             
             // Add a small delay before showing the system message to allow the typing animation to complete
             setTimeout(() => {
-                addMessage('Response stopped by You', 'system');
+                addMessage('Request Aborted', 'system');
                 
                 // Reset UI
                 userInput.disabled = false;

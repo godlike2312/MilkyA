@@ -398,15 +398,24 @@
 
                 <div class="settings-section">
                     <h3>Data Management</h3>
-                    <button id="export-chats" class="settings-button">
-                        <i class="fas fa-download"></i> Export Chats
-                    </button>
-                    <button id="delete-all-chats" class="settings-button danger">
-                        <i class="fas fa-trash"></i> Delete All Chats
-                    </button>
-                    <button id="delete-account" class="settings-button danger">
-                        <i class="fas fa-user-slash"></i> Delete Account
-                    </button>
+                    <div class="export-chats red-zone">
+                        <p>Export Chats</p>
+                        <button id="export-chats" class="settings-button">
+                            <i class="fas fa-download"></i> Export
+                        </button>
+                    </div>
+                    <div class="delete-chats red-zone">
+                        <p>Delete All Chats</p>
+                        <button id="delete-all-chats" class="settings-button danger">
+                            <i class="fas fa-trash"></i> Delete
+                        </button>
+                    </div>
+                    <div class="delete-account red-zone">
+                        <p>Delete Account</p>
+                        <button id="delete-account" class="settings-button danger">
+                            <i class="fas fa-user-slash"></i> Delete
+                        </button>
+                    </div>
                 </div>
             </div>
 
@@ -414,7 +423,10 @@
             <div class="tab-content" id="advanced-tab">
                 <div class="settings-section">
                     <h3><span>Voice</span></h3>
-                    <button id="select-voice-btn" class="settings-button">Select Voice</button>
+                    <div class="voice-se">
+                        <p>Voices</p>
+                        <button id="select-voice-btn" class="settings-button">Select Voice</button>
+                    </div>
                 </div>
                 <div class="settings-section">
                     <h3><span>Read Aloud</span></h3>

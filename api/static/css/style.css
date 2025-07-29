@@ -54,6 +54,10 @@ body {
     --inline-code: black;
     --profile-bg: #6363632b;
     --toast-bg: rgb(32 32 32);
+    --in-custom-shadow: inset 0 0 20px rgb(33 33 33), inset 0 0 40px rgb(57 57 57);
+    --setting-btn-bg: #f3f3f3;
+    --setting-color:rgb(23, 23, 23);
+    --setting-hover:rgba(214, 214, 214, 0.826);
 }
 
 body.light-mode {
@@ -87,7 +91,11 @@ body.light-mode {
     --canvas-header: #dddddd;
     --canvas-codemirror: #d7d7d7;
     --inline-code: none;
-    --profile-bg: #0000002b
+    --profile-bg: #0000002b;
+    --in-custom-shadow: inset 0 0 20px rgb(214 214 214), inset 0 0 40px rgb(137 137 137);
+    --setting-btn-bg: #1a1a1a;
+    --setting-color: rgb(255, 255, 255);
+    --setting-hover: rgba(205, 205, 205, 0.826);
 }
 
 .container {
