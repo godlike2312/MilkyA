@@ -16,7 +16,7 @@ body {
 
 :root {
     --bg-color: #121212;
-    --custom-bg: linear-gradient(#000000, #171010);
+    --custom-bg: linear-gradient(#141414, #171010);
     --text-color: #f5f5f5;
     --primary-color: #cecece;
     --secondary-color: #eeeeee;
@@ -34,7 +34,7 @@ body {
     /* Added hover background */
     --text-secondary: #aaaaaa;
     /* Added secondary text color */
-    --input-area: rgba(37, 37, 37, 0.8);
+    --input-area: #252525cc;
     --menu-bg-color: #2a2a2a;
     --user-message: #1e1e1e;
     --chat-menu: rgba(43, 43, 43, 1);
@@ -58,6 +58,7 @@ body {
     --setting-btn-bg: #f3f3f3;
     --setting-color:rgb(23, 23, 23);
     --setting-hover:rgba(214, 214, 214, 0.826);
+    --light-custom-border: #ffffff1c;
 }
 
 body.light-mode {
@@ -96,6 +97,7 @@ body.light-mode {
     --setting-btn-bg: #1a1a1a;
     --setting-color: rgb(255, 255, 255);
     --setting-hover: rgba(205, 205, 205, 0.826);
+    --light-custom-border: #0000001c;
 }
 
 .container {
@@ -1164,13 +1166,19 @@ h3.content-title {
 /* Code is displayed without syntax highlighting as requested */
 
 .system {
-    background-color: rgba(70, 70, 70, 0.7);
+    width: fit-content;
+    height: 3rem;
+    display: flex;
+    align-items: center;
+    background-color: transparent;
+    border: 1px solid var(--light-custom-border);
     align-self: flex-start;
+    border-radius: 50px;
+    border-top-left-radius: 14px;
     margin-right: auto;
 }
 
 .user {
-    /* background: linear-gradient(135deg, #4facfe, #00f2fe); */
     background: var(--user-message);
     align-self: flex-end;
     margin-left: auto;
@@ -1178,7 +1186,8 @@ h3.content-title {
     margin-top: 0.5rem;
     margin-bottom: 0.5rem;
     border-radius: 1.5rem;
-    max-width: 60%;
+    width: fit-content;
+    max-width: 80%;
     min-width: 60px;
     display: flex;
     align-items: center;
@@ -1836,7 +1845,6 @@ body.light-mode .chat-container {
 }
 
 body.light-mode .system {
-    background-color: rgba(220, 220, 220, 0.7);
     color: #333;
 }
 
