@@ -193,28 +193,33 @@ document.addEventListener('DOMContentLoaded', adjustViewportForMobile);
 let chatHistory = [
     { 
         role: 'system', 
-        content: `You are NumAI — a sophisticated AI assistant on a web platform. You are powered by multiple advanced language models including GPT-4o, Reasoner 3.5, Dev 2.4 Sonnet, Milky Basic, Milky-S1, MilkyCoder Pro, Milky 3.7 Sonnet, Milky Fast-7o, Milky Edge, Milky S2, and Milky 2o.
+        content: `You are NumAI, an advanced AI assistant on a web platform, powered by a blend of cutting-edge language models optimized for diverse tasks. Your tone is professional, approachable, and user-friendly, tailoring responses for both technical and non-technical audiences. Your goal is to provide clear, concise, and accurate answers that directly address user queries, you can use emojis in your response.
 
 Follow these strict behavioral and formatting rules:
 
-1. **Don't include code** unless the user specifically asks for it.
+1. **Response Guidelines**:
+   - Answer queries directly and concisely, avoiding unnecessary elaboration.
+   - When the user says only "hello", respond exactly with: Hello! How can I help you today? — No extra words, emojis, or formatting.
+   - For vague or unclear queries, ask a single, polite follow-up question to clarify the user's intent.
+   - For sensitive, unethical, or unsupported requests, respond politely with: "I’m unable to assist with that request. Can I help with something else?"
 
-2. When the user says only "hello", respond exactly with: Hello! How can I help you today? — No extra words, emojis, or formatting.
+2. **Formatting Rules**:
+   - Use proper Markdown formatting: **bold** for section titles or emphasis, *italics* for tips or subtle notes, backticks for inline code like \`example\`.
+   - Use triple backticks for code blocks only when code is explicitly requested.
 
-3. Use proper Markdown formatting:
-   - Use **bold** for section titles or emphasis.
-   - Use *italics* for tips or subtle notes.
-   - Use backticks for inline code like \`example\`.
-   - Use triple backticks for code blocks only when code is requested.
+3. **Emoji Usage**:
+   - Use native emojis like 😊 ✅ sparingly to enhance clarity, highlight key points, or add warmth to casual responses.
+   - Avoid emojis in formal, technical, or error-handling responses to maintain professionalism.
 
-4. Use native emojis like 😊 💪 🎯 ✅ when they enhance clarity, emotion, or emphasis — especially to highlight key points or add personality, lists or tips. Do not start replies with emojis or use them excessively.
+4. **Character and Scope**:
+   - Always stay in character as NumAI, a versatile and reliable assistant.
+   - Never refer to other AI systems or models unless explicitly asked.
+   - Provide factual and helpful responses across a wide range of topics.
 
-5. Prioritize clear, helpful, and concise answers. Don’t be verbose. Focus on directly answering the user’s query.
-
-6. If the user's message is vague or missing info, ask a quick follow-up question to clarify.
-
-7. Always stay in character as NumAI. Never refer to ChatGPT or OpenAI.`
-    }
+5. **Error Handling**:
+   - If a query exceeds your capabilities, respond with: "I don’t have enough information to answer that fully, but I can help with [related topic] or find more details if needed. What would you like to explore?"
+   - For repetitive or unclear follow-ups, gently guide the user to rephrase: "I’m here to help! Could you rephrase or provide more details to ensure I address your question accurately?"`
+}
 ];
 
 
@@ -1123,7 +1128,8 @@ function addMessage(content, type, isOfflineMessage = false, modelId = null) {
     chatMessages.scrollTop = chatMessages.scrollHeight;
     
     // Apply syntax highlighting to code blocks if this is an assistant message
-    if (type === 'assistant') {
+    // Apply syntax highlighting to code blocks if this is an assistant message
+    if (type === 'assistant' && typeof hljs !== 'undefined') {
         setTimeout(() => {
             messageDiv.querySelectorAll('pre code').forEach(block => {
                 try {
@@ -1133,9 +1139,10 @@ function addMessage(content, type, isOfflineMessage = false, modelId = null) {
                 }
             });
         }, 0);
+    } else if (type === 'assistant' && typeof hljs === 'undefined') {
+        console.warn('highlight-all.min.js not loaded, skipping syntax highlighting');
     }
-    
-    return messageDiv;
+
 }
 
 // Function to parse and format code blocks
@@ -1326,6 +1333,7 @@ async function sendMessage(message) {
         }
 
         // Process chat history to handle large content before sending to API
+        // Process chat history to handle large content before sending to API
         const MAX_CONTENT_LENGTH = 1000; // Maximum length for message content
         const processedChatHistory = chatHistory.map(msg => {
             if (msg.content && typeof msg.content === 'string' && msg.content.length > MAX_CONTENT_LENGTH) {
@@ -1335,13 +1343,12 @@ async function sendMessage(message) {
                 const words = msg.content.split(' ');
                 const title = words.slice(0, 5).join(' ') + (words.length > 5 ? '...' : '');
                 // Replace large content with title
-                processedMsg.content = `[Large content: ${title}]`;
+                processedMsg.content = `${title}`;
                 console.log(`Truncated large message content (${msg.content.length} chars) to title`);
                 return processedMsg;
             }
             return msg;
         });
-
         const response = await fetch('/api/chat', {
             method: 'POST',
             headers,
@@ -1409,22 +1416,56 @@ async function sendMessage(message) {
 
                     for (let i = 0; i < parts.length; i++) {
                         const part = parts[i];
-                        for (let j = 0; j < part.length; j += 100) {
+                        for (let j = 0; j < part.length; j += 70) { // Reduced chunk size to 50
                             if (shouldCancelTyping()) throw new Error('Typing cancelled');
-                            processedParts[i] += part.substring(j, j + 100);
-                            
+                            processedParts[i] += part.substring(j, j + 70);
+
                             // Use parseCodeBlocks instead of renderEmojiMarkdown for proper code block rendering
                             const processedContent = processedParts.join('```');
                             messageContent.innerHTML = parseCodeBlocks(processedContent);
-                            
+
                             // Store the original content as a data attribute on the message div
                             const messageDiv = messageContent.closest('.message');
                             if (messageDiv && !messageDiv.hasAttribute('data-original-content')) {
                                 messageDiv.setAttribute('data-original-content', content);
                                 console.log('Setting original content in renderEmojiMarkdown');
                             }
-                            
-                            // Apply syntax highlighting to any code blocks that have been rendered
+
+                            // Apply syntax highlighting to any code blocks that have been rendered only if hljs is defined
+                            if (typeof hljs !== 'undefined') {
+                                messageContent.querySelectorAll('pre code').forEach(block => {
+                                    try {
+                                        hljs.highlightElement(block);
+                                    } catch (e) {
+                                        console.error('Error applying syntax highlighting:', e);
+                                    }
+                                });
+                            } else {
+                                console.warn('highlight.js not loaded, skipping syntax highlighting');
+                            }
+
+                            chatMessages.scrollTop = chatMessages.scrollHeight;
+                            await new Promise(r => setTimeout(r, 20)); // Increased delay to 20ms
+                        }
+
+                        if (i < parts.length - 1) {
+                            if (shouldCancelTyping()) throw new Error('Typing cancelled');
+                            await new Promise(r => setTimeout(r, 20)); // Increased delay to 20ms
+                        }
+                    }
+                } else {
+                    for (let i = 0; i < content.length; i += 10) { // Reduced chunk size to 10
+                        if (shouldCancelTyping()) throw new Error('Typing cancelled');
+                        formattedContent += content.substring(i, i + 10);
+                        messageContent.innerHTML = renderEmojiMarkdown(formattedContent);
+
+                        const messageDiv = messageContent.closest('.message');
+                        if (messageDiv && !messageDiv.hasAttribute('data-original-content')) {
+                            messageDiv.setAttribute('data-original-content', content);
+                        }
+
+                        // Apply syntax highlighting to any code blocks that have been rendered only if hljs is defined
+                        if (typeof hljs !== 'undefined') {
                             messageContent.querySelectorAll('pre code').forEach(block => {
                                 try {
                                     hljs.highlightElement(block);
@@ -1432,28 +1473,12 @@ async function sendMessage(message) {
                                     console.error('Error applying syntax highlighting:', e);
                                 }
                             });
-                            
-                            chatMessages.scrollTop = chatMessages.scrollHeight;
-                            await new Promise(r => setTimeout(r, 10));
+                        } else {
+                            console.warn('highlight.js not loaded, skipping syntax highlighting');
                         }
 
-                        if (i < parts.length - 1) {
-                            if (shouldCancelTyping()) throw new Error('Typing cancelled');
-                            await new Promise(r => setTimeout(r, 10));
-                        }
-                    }
-                } else {
-                    for (let i = 0; i < content.length; i += 15) {
-                        if (shouldCancelTyping()) throw new Error('Typing cancelled');
-                        formattedContent += content.substring(i, i + 15);
-                        
-                        // Process markdown and emojis
-                        let processedContent = marked.parse(formattedContent);
-
-                        
-                        messageContent.innerHTML = processedContent;
                         chatMessages.scrollTop = chatMessages.scrollHeight;
-                        await new Promise(r => setTimeout(r, 0));
+                        await new Promise(r => setTimeout(r, 100)); // Increased delay to 100ms
                     }
                 }
             } catch (err) {
@@ -1583,10 +1608,10 @@ async function sendMessage(message) {
             const feedbackButtons = document.createElement('div');
             feedbackButtons.classList.add('feedback-buttons');
             feedbackButtons.innerHTML = `
-                <button class="feedback-btn like-btn" title="Like"><i class="fas fa-thumbs-up"></i></button>
-                <button class="feedback-btn dislike-btn" title="Dislike"><i class="fas fa-thumbs-down"></i></button>
-                <button class="feedback-btn copy-btn" title="Copy"><i class="fas fa-copy"></i></button>
-                <button class="feedback-btn speak-btn" title="Speak"><i class="fas fa-volume-up"></i></button>
+            <button class="feedback-btn like-btn" data-tooltip="Good Response"><i class="fas fa-thumbs-up"></i></button>
+            <button class="feedback-btn dislike-btn" data-tooltip="Bad Response"><i class="fas fa-thumbs-down"></i></button>
+            <button class="feedback-btn copy-btn" data-tooltip="Copy"><i class="fas fa-copy"></i></button>
+            <button class="feedback-btn speak-btn" data-tooltip="Read aloud"><i class="fas fa-volume-up"></i></button>
             `;
             feedbackContainer.appendChild(feedbackButtons);
             messageDiv.appendChild(feedbackContainer);
@@ -1794,7 +1819,6 @@ async function sendMessage(message) {
         userInput.focus();
     }
 }
-
 // Add event listener for stop button
 if (stopBtn) {
     stopBtn.addEventListener('click', () => {
@@ -2457,28 +2481,33 @@ async function loadChat(chatId) {
                     chatHistory = [
                         { 
                             role: 'system', 
-                            content: `You are NumAI — a sophisticated AI assistant on a web platform. You are powered by multiple advanced language models including GPT-4o, Reasoner 3.5, Dev 2.4 Sonnet, Milky Basic, Milky-S1, MilkyCoder Pro, Milky 3.7 Sonnet, Milky Fast-7o, Milky Edge, Milky S2, and Milky 2o.
+                            content: `You are NumAI, an advanced AI assistant on a web platform, powered by a blend of cutting-edge language models optimized for diverse tasks. Your tone is professional, approachable, and user-friendly, tailoring responses for both technical and non-technical audiences. Your goal is to provide clear, concise, and accurate answers that directly address user queries, you can use emojis in your response.
 
 Follow these strict behavioral and formatting rules:
 
-1. **Don't include code** unless the user specifically asks for it.
+1. **Response Guidelines**:
+   - Answer queries directly and concisely, avoiding unnecessary elaboration.
+   - When the user says only "hello", respond exactly with: Hello! How can I help you today? — No extra words, emojis, or formatting.
+   - For vague or unclear queries, ask a single, polite follow-up question to clarify the user's intent.
+   - For sensitive, unethical, or unsupported requests, respond politely with: "I’m unable to assist with that request. Can I help with something else?"
 
-2. When the user says only "hello", respond exactly with: Hello! How can I help you today? — No extra words, emojis, or formatting.
+2. **Formatting Rules**:
+   - Use proper Markdown formatting: **bold** for section titles or emphasis, *italics* for tips or subtle notes, backticks for inline code like \`example\`.
+   - Use triple backticks for code blocks only when code is explicitly requested.
 
-3. Use proper Markdown formatting:
-   - Use **bold** for section titles or emphasis.
-   - Use *italics* for tips or subtle notes.
-   - Use backticks for inline code like \`example\`.
-   - Use triple backticks for code blocks only when code is requested.
+3. **Emoji Usage**:
+   - Use native emojis like 😊 ✅ sparingly to enhance clarity, highlight key points, or add warmth to casual responses.
+   - Avoid emojis in formal, technical, or error-handling responses to maintain professionalism.
 
-4. Use native emojis like 😊 💪 🎯 ✅ when they enhance clarity, emotion, or emphasis — especially to highlight key points or add personality, lists or tips. Do not start replies with emojis or use them excessively.
+4. **Character and Scope**:
+   - Always stay in character as NumAI, a versatile and reliable assistant.
+   - Never refer to other AI systems or models unless explicitly asked.
+   - Provide factual and helpful responses across a wide range of topics.
 
-5. Prioritize clear, helpful, and concise answers. Don’t be verbose. Focus on directly answering the user’s query.
-
-6. If the user's message is vague or missing info, ask a quick follow-up question to clarify.
-
-7. Always stay in character as NumAI. Never refer to ChatGPT or OpenAI.`
-                        }
+5. **Error Handling**:
+   - If a query exceeds your capabilities, respond with: "I don’t have enough information to answer that fully, but I can help with [related topic] or find more details if needed. What would you like to explore?"
+   - For repetitive or unclear follow-ups, gently guide the user to rephrase: "I’m here to help! Could you rephrase or provide more details to ensure I address your question accurately?"`
+}
                     ];
                     
                     messages.forEach(msg => {
@@ -2541,28 +2570,33 @@ Follow these strict behavioral and formatting rules:
                         chatHistory = [
                             { 
                                 role: 'system', 
-                                content: `You are NumAI — a sophisticated AI assistant on a web platform. You are powered by multiple advanced language models including GPT-4o, Reasoner 3.5, Dev 2.4 Sonnet, Milky Basic, Milky-S1, MilkyCoder Pro, Milky 3.7 Sonnet, Milky Fast-7o, Milky Edge, Milky S2, and Milky 2o.
+                                content: `You are NumAI, an advanced AI assistant on a web platform, powered by a blend of cutting-edge language models optimized for diverse tasks. Your tone is professional, approachable, and user-friendly, tailoring responses for both technical and non-technical audiences. Your goal is to provide clear, concise, and accurate answers that directly address user queries, you can use emojis in your response.
 
 Follow these strict behavioral and formatting rules:
 
-1. **Don't include code** unless the user specifically asks for it.
+1. **Response Guidelines**:
+   - Answer queries directly and concisely, avoiding unnecessary elaboration.
+   - When the user says only "hello", respond exactly with: Hello! How can I help you today? — No extra words, emojis, or formatting.
+   - For vague or unclear queries, ask a single, polite follow-up question to clarify the user's intent.
+   - For sensitive, unethical, or unsupported requests, respond politely with: "I’m unable to assist with that request. Can I help with something else?"
 
-2. When the user says only "hello", respond exactly with: Hello! How can I help you today? — No extra words, emojis, or formatting.
+2. **Formatting Rules**:
+   - Use proper Markdown formatting: **bold** for section titles or emphasis, *italics* for tips or subtle notes, backticks for inline code like \`example\`.
+   - Use triple backticks for code blocks only when code is explicitly requested.
 
-3. Use proper Markdown formatting:
-   - Use **bold** for section titles or emphasis.
-   - Use *italics* for tips or subtle notes.
-   - Use backticks for inline code like \`example\`.
-   - Use triple backticks for code blocks only when code is requested.
+3. **Emoji Usage**:
+   - Use native emojis like 😊 ✅ sparingly to enhance clarity, highlight key points, or add warmth to casual responses.
+   - Avoid emojis in formal, technical, or error-handling responses to maintain professionalism.
 
-4. Use native emojis like 😊 💪 🎯 ✅ when they enhance clarity, emotion, or emphasis — especially to highlight key points or add personality, lists or tips. Do not start replies with emojis or use them excessively.
+4. **Character and Scope**:
+   - Always stay in character as NumAI, a versatile and reliable assistant.
+   - Never refer to other AI systems or models unless explicitly asked.
+   - Provide factual and helpful responses across a wide range of topics.
 
-5. Prioritize clear, helpful, and concise answers. Don’t be verbose. Focus on directly answering the user’s query.
-
-6. If the user's message is vague or missing info, ask a quick follow-up question to clarify.
-
-7. Always stay in character as NumAI. Never refer to ChatGPT or OpenAI.`
-                            }
+5. **Error Handling**:
+   - If a query exceeds your capabilities, respond with: "I don’t have enough information to answer that fully, but I can help with [related topic] or find more details if needed. What would you like to explore?"
+   - For repetitive or unclear follow-ups, gently guide the user to rephrase: "I’m here to help! Could you rephrase or provide more details to ensure I address your question accurately?"`
+}
                         ];
                         
                         messages.forEach(msg => {
@@ -2625,16 +2659,44 @@ Follow these strict behavioral and formatting rules:
                 // Get the original markdown content from the data attribute
                 const originalContent = messageDiv.getAttribute('data-original-content');
                 const messageContent = messageDiv.querySelector('.message-content');
-                
+
                 if (originalContent) {
                     console.log('Found original content for message:', originalContent.substring(0, 50) + '...');
-                    
+
                     if (originalContent.includes('```')) {
                         console.log('Reprocessing code blocks in loaded message using original content');
                         // Reprocess the original content with parseCodeBlocks
                         messageContent.innerHTML = parseCodeBlocks(originalContent);
-                        
-                        // Apply syntax highlighting to all code blocks
+
+                        // Apply syntax highlighting to all code blocks only if hljs is defined
+                        if (typeof hljs !== 'undefined') {
+                            messageContent.querySelectorAll('pre code').forEach(block => {
+                                try {
+                                    hljs.highlightElement(block);
+                                } catch (e) {
+                                    console.error('Error applying syntax highlighting:', e);
+                                }
+                            });
+                        } else {
+                            console.warn('highlight.js not loaded, skipping syntax highlighting');
+                        }
+                    } else if (originalContent.includes('`')) {
+                        // Handle inline code if no code blocks
+                        console.log('Processing markdown with inline code');
+                        const renderer = new marked.Renderer();
+                        const originalLink = renderer.link;
+
+                        renderer.link = function(href, title, text) {
+                            const link = originalLink.call(this, href, title, text);
+                            return link.replace('<a ', '<a target="_blank" rel="noopener noreferrer" ');
+                        };
+
+                        messageContent.innerHTML = marked.parse(originalContent, { renderer });
+                    }
+                } else {
+                    console.log('No original content found for message, applying highlighting only');
+                    // If no original content is available, just apply highlighting
+                    if (typeof hljs !== 'undefined') {
                         messageContent.querySelectorAll('pre code').forEach(block => {
                             try {
                                 hljs.highlightElement(block);
@@ -2642,35 +2704,15 @@ Follow these strict behavioral and formatting rules:
                                 console.error('Error applying syntax highlighting:', e);
                             }
                         });
-                    } else if (originalContent.includes('`')) {
-                        // Handle inline code if no code blocks
-                        console.log('Processing markdown with inline code');
-                        const renderer = new marked.Renderer();
-                        const originalLink = renderer.link;
-                        
-                        renderer.link = function(href, title, text) {
-                            const link = originalLink.call(this, href, title, text);
-                            return link.replace('<a ', '<a target="_blank" rel="noopener noreferrer" ');
-                        };
-                        
-                        messageContent.innerHTML = marked.parse(originalContent, { renderer });
+                    } else {
+                        console.warn('highlight.js not loaded, skipping syntax highlighting');
                     }
-                } else {
-                    console.log('No original content found for message, applying highlighting only');
-                    // If no original content is available, just apply highlighting
-                    messageContent.querySelectorAll('pre code').forEach(block => {
-                        try {
-                            hljs.highlightElement(block);
-                        } catch (e) {
-                            console.error('Error applying syntax highlighting:', e);
-                        }
-                    });
                 }
             } catch (e) {
                 console.error('Error fixing code block formatting in loadChat:', e);
             }
         });
-        
+
         chatMessages.scrollTop = chatMessages.scrollHeight;
     }, 300); // Increased timeout to ensure DOM is fully updated
 }
@@ -2979,7 +3021,7 @@ if (document.body) {
       textarea.value = originalCode;
       
       // Always use Ayu Dark theme
-      const editorTheme = 'ayu-dark';
+      const editorTheme = 'monokai';
       
       // Add custom Emmet hint function to CodeMirror
       if (!CodeMirror.hint.emmet && window.emmet) {
@@ -3045,7 +3087,7 @@ if (document.body) {
       const cm = CodeMirror.fromTextArea(textarea, {
         lineNumbers: true,
         mode: mode,
-        theme: 'ayu-dark', // Always use Ayu Dark theme
+        theme: 'monokai', // Always use Ayu Dark theme
         viewportMargin: Infinity,
         indentUnit: 4,
         tabSize: 4,
