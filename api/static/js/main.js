@@ -841,8 +841,12 @@ function addMessage(content, type, isOfflineMessage = false, modelId = null) {
             return originalText.call(this, emojiText);
         };
         
-        // First check if the content contains code blocks
-        if (content.includes('```')) {
+        // Check if content should be treated as code (contains HTML patterns)
+        if (shouldTreatAsCode(content) && !content.includes('```')) {
+            // Wrap HTML content in code blocks to prevent execution
+            const wrappedContent = '```html\n' + content + '\n```';
+            messageContent.innerHTML = parseCodeBlocks(wrappedContent);
+        } else if (content.includes('```')) {
             // Use our custom parseCodeBlocks function to handle code blocks with proper language classes
             // This ensures code blocks get the proper language class for highlight.js
             messageContent.innerHTML = parseCodeBlocks(content);
@@ -1133,7 +1137,20 @@ function addMessage(content, type, isOfflineMessage = false, modelId = null) {
         setTimeout(() => {
             messageDiv.querySelectorAll('pre code').forEach(block => {
                 try {
-                    hljs.highlightElement(block);
+                    // Check if this is HTML content that should not be highlighted
+                    const codeText = block.textContent;
+                    if (codeText.includes('<') && codeText.includes('>')) {
+                        // For HTML content, ensure it's displayed as text only
+                        block.textContent = codeText;
+                    } else {
+                        // For non-HTML content, apply syntax highlighting
+                        const originalText = block.textContent;
+                        hljs.highlightElement(block);
+                        // Ensure the content is safe by using textContent
+                        if (block.innerHTML !== originalText) {
+                            block.textContent = originalText;
+                        }
+                    }
                 } catch (e) {
                     console.error('Error applying syntax highlighting:', e);
                 }
@@ -1143,6 +1160,95 @@ function addMessage(content, type, isOfflineMessage = false, modelId = null) {
         console.warn('highlight-all.min.js not loaded, skipping syntax highlighting');
     }
 
+}
+
+// Function to sanitize HTML content to prevent execution
+function sanitizeHtmlContent(content) {
+    // If content looks like HTML but is meant to be displayed as code, escape it
+    if (content.includes('<') && content.includes('>')) {
+        return content
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
+    }
+    return content;
+}
+
+// Function to detect if content should be treated as code
+function shouldTreatAsCode(content) {
+    // Check if content contains HTML-like patterns that should be displayed as code
+    const htmlPatterns = [
+        /<[^>]+>/g,  // HTML tags
+        /<!DOCTYPE/i,  // DOCTYPE declaration
+        /<html/i,      // HTML element
+        /<head/i,      // HEAD element
+        /<body/i,      // BODY element
+        /<script/i,    // SCRIPT element
+        /<style/i,     // STYLE element
+        /<div/i,       // DIV element
+        /<span/i,      // SPAN element
+        /<p>/i,        // P element
+        /<h[1-6]/i,   // H1-H6 elements
+        /<a\s+href/i,  // A element with href
+        /<img/i,       // IMG element
+        /<form/i,      // FORM element
+        /<input/i,     // INPUT element
+        /<button/i,    // BUTTON element
+        /<table/i,     // TABLE element
+        /<ul/i,        // UL element
+        /<ol/i,        // OL element
+        /<li/i         // LI element
+    ];
+    
+    return htmlPatterns.some(pattern => pattern.test(content));
+}
+
+// Function to detect language from code content
+function detectLanguageFromContent(content) {
+    const firstFewLines = content.substring(0, 200).toLowerCase();
+    
+    // CSS detection
+    if (firstFewLines.includes('{') && firstFewLines.includes('}') && 
+        (firstFewLines.includes('color:') || firstFewLines.includes('background:') || 
+         firstFewLines.includes('margin:') || firstFewLines.includes('padding:') ||
+         firstFewLines.includes('font-size:') || firstFewLines.includes('border:'))) {
+        return 'css';
+    }
+    
+    // HTML detection
+    if (firstFewLines.includes('<html') || firstFewLines.includes('<!doctype') ||
+        firstFewLines.includes('<head') || firstFewLines.includes('<body') ||
+        firstFewLines.includes('<div') || firstFewLines.includes('<p>')) {
+        return 'html';
+    }
+    
+    // JavaScript detection
+    if (firstFewLines.includes('function') || firstFewLines.includes('const ') || 
+        firstFewLines.includes('let ') || firstFewLines.includes('var ') ||
+        firstFewLines.includes('console.log') || firstFewLines.includes('document.')) {
+        return 'javascript';
+    }
+    
+    // Python detection
+    if (firstFewLines.includes('def ') || firstFewLines.includes('import ') ||
+        firstFewLines.includes('print(') || firstFewLines.includes('if __name__') ||
+        firstFewLines.includes('class ') || firstFewLines.includes('from ')) {
+        return 'python';
+    }
+    
+    // JSON detection
+    if (firstFewLines.includes('"') && firstFewLines.includes('{') && firstFewLines.includes('}')) {
+        return 'json';
+    }
+    
+    // XML detection
+    if (firstFewLines.includes('<?xml') || firstFewLines.includes('<root>')) {
+        return 'xml';
+    }
+    
+    return null;
 }
 
 // Function to parse and format code blocks
@@ -1205,15 +1311,43 @@ function parseCodeBlocks(content) {
         } else {
             let codeContent = parts[i];
             let language = '';
+            
+            // Check if the first line contains a language identifier (no spaces, just alphanumeric)
             const firstLineBreak = codeContent.indexOf('\n');
             if (firstLineBreak > 0) {
-                language = codeContent.substring(0, firstLineBreak).trim();
-                codeContent = codeContent.substring(firstLineBreak + 1);
+                const firstLine = codeContent.substring(0, firstLineBreak).trim();
+                // Check if first line looks like a language identifier (no spaces, mostly letters)
+                if (firstLine && !firstLine.includes(' ') && /^[a-zA-Z0-9+#]+$/.test(firstLine)) {
+                    language = firstLine;
+                    codeContent = codeContent.substring(firstLineBreak + 1);
+                    console.log('Extracted language from first line:', language);
+                } else {
+                    console.log('First line does not look like a language identifier:', firstLine);
+                }
+            } else {
+                console.log('No line break found, using full content as code');
             }
+            
+            console.log('Processing code block with language:', language);
+            console.log('Code content preview:', codeContent.substring(0, 100));
+            
             result += '<div class="code-block">';
             result += '<div class="code-header">';
             if (language) {
-                result += '<div class="code-language">' + language + '</div>';
+                // Clean up language name for display
+                const displayLanguage = language.toLowerCase().replace(/[^a-zA-Z0-9]/g, '');
+                result += '<div class="code-language">' + displayLanguage + '</div>';
+                console.log('Added language header:', displayLanguage);
+            } else {
+                console.log('No language detected for code block');
+                // Try to detect language from content
+                const detectedLanguage = detectLanguageFromContent(codeContent);
+                if (detectedLanguage) {
+                    result += '<div class="code-language">' + detectedLanguage + '</div>';
+                    console.log('Detected language from content:', detectedLanguage);
+                } else {
+                    result += '<div class="code-language">Example</div>';
+                }
             }
             // Group Copy and Edit buttons in a flex container
             result += '<div class="code-buttons">';
@@ -1221,12 +1355,11 @@ function parseCodeBlocks(content) {
             result += '<button class="edit-code-btn" data-tooltip="Edit in Canvas" title="Edit in Canvas"><i class="fas fa-pencil-alt"></i> Edit</button>';
             result += '</div>';
             result += '</div>';
-            const escapedContent = codeContent
-                .replace(/&/g, '&amp;')
-                .replace(/</g, '&lt;')
-                .replace(/>/g, '&gt;')
-                .replace(/"/g, '&quot;')
-                .replace(/\\'/g, '&#039;');
+            
+            // Always escape HTML content to prevent execution
+            const escapedContent = sanitizeHtmlContent(codeContent)
+                .replace(/\\/g, '\\\\');
+            
             // Add language class for highlight.js
             // Make sure to clean the language name to avoid issues
             let cleanLanguage = '';
@@ -1387,6 +1520,11 @@ async function sendMessage(message) {
 
             // Markdown & Emoji rendering
             const renderEmojiMarkdown = (text) => {
+                // Check if the text contains code blocks
+                if (text.includes('```')) {
+                    return parseCodeBlocks(text);
+                }
+                
                 const renderer = new marked.Renderer();
                 const originalText = renderer.text;
                 const originalLink = renderer.link;
@@ -1399,7 +1537,6 @@ async function sendMessage(message) {
                     return originalText.call(this, text); // ✅ No emoji parsing
                 };
 
-
                 return marked.parse(text, { renderer });
             };
 
@@ -1410,8 +1547,15 @@ async function sendMessage(message) {
             const shouldCancelTyping = () => !isResponding || isTypingCancelled;
 
             try {
-                if (content.includes('```')) {
-                    const parts = content.split('```');
+                // Check if content should be treated as code (contains HTML patterns)
+                let processedContent = content;
+                if (shouldTreatAsCode(content) && !content.includes('```')) {
+                    // Wrap HTML content in code blocks to prevent execution
+                    processedContent = '```html\n' + content + '\n```';
+                }
+                
+                if (processedContent.includes('```')) {
+                    const parts = processedContent.split('```');
                     let processedParts = parts.map(() => '');
 
                     for (let i = 0; i < parts.length; i++) {
@@ -1421,8 +1565,8 @@ async function sendMessage(message) {
                             processedParts[i] += part.substring(j, j + 70);
 
                             // Use parseCodeBlocks instead of renderEmojiMarkdown for proper code block rendering
-                            const processedContent = processedParts.join('```');
-                            messageContent.innerHTML = parseCodeBlocks(processedContent);
+                            const finalProcessedContent = processedParts.join('```');
+                            messageContent.innerHTML = parseCodeBlocks(finalProcessedContent);
 
                             // Store the original content as a data attribute on the message div
                             const messageDiv = messageContent.closest('.message');
@@ -1435,7 +1579,20 @@ async function sendMessage(message) {
                             if (typeof hljs !== 'undefined') {
                                 messageContent.querySelectorAll('pre code').forEach(block => {
                                     try {
-                                        hljs.highlightElement(block);
+                                        // Check if this is HTML content that should not be highlighted
+                                        const codeText = block.textContent;
+                                        if (codeText.includes('<') && codeText.includes('>')) {
+                                            // For HTML content, ensure it's displayed as text only
+                                            block.textContent = codeText;
+                                        } else {
+                                            // For non-HTML content, apply syntax highlighting
+                                            const originalText = block.textContent;
+                                            hljs.highlightElement(block);
+                                            // Ensure the content is safe by using textContent
+                                            if (block.innerHTML !== originalText) {
+                                                block.textContent = originalText;
+                                            }
+                                        }
                                     } catch (e) {
                                         console.error('Error applying syntax highlighting:', e);
                                     }
@@ -1468,7 +1625,20 @@ async function sendMessage(message) {
                         if (typeof hljs !== 'undefined') {
                             messageContent.querySelectorAll('pre code').forEach(block => {
                                 try {
-                                    hljs.highlightElement(block);
+                                    // Check if this is HTML content that should not be highlighted
+                                    const codeText = block.textContent;
+                                    if (codeText.includes('<') && codeText.includes('>')) {
+                                        // For HTML content, ensure it's displayed as text only
+                                        block.textContent = codeText;
+                                    } else {
+                                        // For non-HTML content, apply syntax highlighting
+                                        const originalText = block.textContent;
+                                        hljs.highlightElement(block);
+                                        // Ensure the content is safe by using textContent
+                                        if (block.innerHTML !== originalText) {
+                                            block.textContent = originalText;
+                                        }
+                                    }
                                 } catch (e) {
                                     console.error('Error applying syntax highlighting:', e);
                                 }
@@ -2672,7 +2842,20 @@ Follow these strict behavioral and formatting rules:
                         if (typeof hljs !== 'undefined') {
                             messageContent.querySelectorAll('pre code').forEach(block => {
                                 try {
-                                    hljs.highlightElement(block);
+                                    // Check if this is HTML content that should not be highlighted
+                                    const codeText = block.textContent;
+                                    if (codeText.includes('<') && codeText.includes('>')) {
+                                        // For HTML content, ensure it's displayed as text only
+                                        block.textContent = codeText;
+                                    } else {
+                                        // For non-HTML content, apply syntax highlighting
+                                        const originalText = block.textContent;
+                                        hljs.highlightElement(block);
+                                        // Ensure the content is safe by using textContent
+                                        if (block.innerHTML !== originalText) {
+                                            block.textContent = originalText;
+                                        }
+                                    }
                                 } catch (e) {
                                     console.error('Error applying syntax highlighting:', e);
                                 }
@@ -2683,15 +2866,21 @@ Follow these strict behavioral and formatting rules:
                     } else if (originalContent.includes('`')) {
                         // Handle inline code if no code blocks
                         console.log('Processing markdown with inline code');
-                        const renderer = new marked.Renderer();
-                        const originalLink = renderer.link;
+                        
+                        // Check if the content contains code blocks
+                        if (originalContent.includes('```')) {
+                            messageContent.innerHTML = parseCodeBlocks(originalContent);
+                        } else {
+                            const renderer = new marked.Renderer();
+                            const originalLink = renderer.link;
 
-                        renderer.link = function(href, title, text) {
-                            const link = originalLink.call(this, href, title, text);
-                            return link.replace('<a ', '<a target="_blank" rel="noopener noreferrer" ');
-                        };
+                            renderer.link = function(href, title, text) {
+                                const link = originalLink.call(this, href, title, text);
+                                return link.replace('<a ', '<a target="_blank" rel="noopener noreferrer" ');
+                            };
 
-                        messageContent.innerHTML = marked.parse(originalContent, { renderer });
+                            messageContent.innerHTML = marked.parse(originalContent, { renderer });
+                        }
                     }
                 } else {
                     console.log('No original content found for message, applying highlighting only');
@@ -2699,7 +2888,20 @@ Follow these strict behavioral and formatting rules:
                     if (typeof hljs !== 'undefined') {
                         messageContent.querySelectorAll('pre code').forEach(block => {
                             try {
-                                hljs.highlightElement(block);
+                                // Check if this is HTML content that should not be highlighted
+                                const codeText = block.textContent;
+                                if (codeText.includes('<') && codeText.includes('>')) {
+                                    // For HTML content, ensure it's displayed as text only
+                                    block.textContent = codeText;
+                                } else {
+                                    // For non-HTML content, apply syntax highlighting
+                                    const originalText = block.textContent;
+                                    hljs.highlightElement(block);
+                                    // Ensure the content is safe by using textContent
+                                    if (block.innerHTML !== originalText) {
+                                        block.textContent = originalText;
+                                    }
+                                }
                             } catch (e) {
                                 console.error('Error applying syntax highlighting:', e);
                             }
@@ -3020,8 +3222,9 @@ if (document.body) {
       const textarea = document.getElementById('canvas-cm-textarea');
       textarea.value = originalCode;
       
-      // Always use Ayu Dark theme
-      const editorTheme = 'monokai';
+      // Initialize theme state based on app theme
+      const appTheme = localStorage.getItem('theme') || 'dark';
+      const editorTheme = appTheme === 'light' ? 'default' : 'monokai';
       
       // Add custom Emmet hint function to CodeMirror
       if (!CodeMirror.hint.emmet && window.emmet) {
@@ -3289,7 +3492,44 @@ if (document.body) {
         }
       });
       
-      // No theme selector needed as we're using Ayu Dark permanently
+      // Function to update CodeMirror theme based on app theme
+      function updateCodeMirrorTheme() {
+        const appTheme = localStorage.getItem('theme') || 'dark';
+        const newEditorTheme = appTheme === 'light' ? 'default' : 'monokai';
+        console.log('Updating CodeMirror theme to:', newEditorTheme, 'based on app theme:', appTheme);
+        cm.setOption('theme', newEditorTheme);
+      }
+      
+      // Listen for theme changes from settings
+      const observer = new MutationObserver(function(mutations) {
+        mutations.forEach(function(mutation) {
+          if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+            const isLightMode = mutation.target.classList.contains('light-mode');
+            console.log('Theme change detected, light mode:', isLightMode);
+            updateCodeMirrorTheme();
+          }
+        });
+      });
+      
+      // Start observing the body element for theme changes
+      observer.observe(document.body, {
+        attributes: true,
+        attributeFilter: ['class']
+      });
+      
+      // Listen for custom theme change event
+      document.addEventListener('themeChanged', function(e) {
+        console.log('Theme change event received:', e.detail.theme);
+        updateCodeMirrorTheme();
+      });
+      
+      // Also listen for storage changes (when theme is changed from settings)
+      window.addEventListener('storage', function(e) {
+        if (e.key === 'theme') {
+          console.log('Theme changed in storage:', e.newValue);
+          updateCodeMirrorTheme();
+        }
+      });
       
       // Copy button handler
       const copyBtn = document.getElementById('copy-code-btn');
@@ -3749,7 +3989,8 @@ if (document.body) {
       };
       
       // Apply theme based on saved preference
-      if (isDarkMode) {
+      const savedTheme = localStorage.getItem('theme') || 'dark';
+      if (savedTheme === 'dark') {
         document.body.classList.remove('light-mode');
       } else {
         document.body.classList.add('light-mode');
