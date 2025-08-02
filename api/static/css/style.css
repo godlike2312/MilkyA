@@ -1070,9 +1070,14 @@ h3.content-title {
 }
 
 .code-language {
-    font-size: 12px;
-    color: #bfbfbf;
+    font-size: 10px;
+    color: #757575;
     letter-spacing: 0.5px;
+    font-weight: 500;
+    text-transform: uppercase;
+    padding: 2px 6px;
+    border-radius: 3px;
+    margin-right: 8px;
 }
 
 .code-buttons {
@@ -2721,6 +2726,28 @@ hr {
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
 }
 
+/* Light mode CodeMirror adjustments */
+body.light-mode .CodeMirror {
+    background: #f8f9fa !important;
+    color: #333 !important;
+}
+
+body.light-mode .CodeMirror-gutters {
+    background: #f1f3f4 !important;
+}
+
+body.light-mode .CodeMirror-linenumber {
+    color: #666 !important;
+}
+
+body.light-mode .CodeMirror-cursor {
+    border-left: 2px solid #007acc !important;
+}
+
+body.light-mode .CodeMirror-selected {
+    background: rgba(0, 122, 204, 0.1) !important;
+}
+
 /* Editor Controls */
 .canvas-editor-controls {
     display: flex;
@@ -2751,6 +2778,8 @@ hr {
     cursor: pointer;
     transition: all 0.2s;
 }
+
+
 
 #preview-code-btn {
     border-radius: 50px;
